@@ -12,18 +12,18 @@ import server.Protocol_Config;
 import model.User;
 
 /**
- * @TODO£º
+ * @TODOï¼š
  * @fileName : client.Base.java
  * date | author | version |   
- * 2015Äê11ÔÂ12ÈÕ | Jiong | 1.0 |
+ * 2015å¹´11æœˆ12æ—¥ | Jiong | 1.0 |
  */
 public class Base {
-	ChatHandler handler;//Óë·şÎñÆ÷Á´½ÓµÄ´¦ÀíÀà
-	List<RoomChatClient> frameList = new ArrayList<RoomChatClient>();//ÓÃ»§´ò¿ªµÄ´°¿Ú
-	List<PrivateChat> privateChatList = new ArrayList<PrivateChat>();//ÓÃ»§µÄË½ÁÄ´°¿Ú
-	List<PrivateChat> waitLookPrivateChatList = new ArrayList<PrivateChat>();//µÈ´ıÓÃ»§²é¿´µÄË½ÁÄ´°¿Ú
+	ChatHandler handler;//ä¸æœåŠ¡å™¨é“¾æ¥çš„å¤„ç†ç±»
+	List<RoomChatClient> frameList = new ArrayList<RoomChatClient>();//ç”¨æˆ·æ‰“å¼€çš„çª—å£
+	List<PrivateChat> privateChatList = new ArrayList<PrivateChat>();//ç”¨æˆ·çš„ç§èŠçª—å£
+	List<PrivateChat> waitLookPrivateChatList = new ArrayList<PrivateChat>();//ç­‰å¾…ç”¨æˆ·æŸ¥çœ‹çš„ç§èŠçª—å£
 	PrivateChatListDialog privateChatListDialog;
-	GroundChatClient roomListDialog = null;//·¿¼äÁĞ±í
+	GroundChatClient roomListDialog = null;//æˆ¿é—´åˆ—è¡¨
 	User user = new User();
 	String[] warningWord = null;
 	
@@ -46,26 +46,26 @@ public class Base {
 		handler.changeUser(user);
 	}
 	public Base(){
-		//½«Õâ¸öÀàµÄ¶ÔÏó½»¸øhandler´¦Àí
+		//å°†è¿™ä¸ªç±»çš„å¯¹è±¡äº¤ç»™handlerå¤„ç†
 		handler = new ChatHandler(this);
 		if(!handler.linkServer()){
-			JOptionPane.showMessageDialog(null, "Á¬½Ó·şÎñÆ÷Ê§°Ü£¡", "ÌáÊ¾", JOptionPane.CLOSED_OPTION, null);
+			JOptionPane.showMessageDialog(null, "è¿æ¥æœåŠ¡å™¨å¤±è´¥ï¼", "æç¤º", JOptionPane.CLOSED_OPTION, null);
 			return;
 		}
 		String name;
 		try{
 			name = 
-				JOptionPane.showInputDialog(null,"ÊäÈëêÇ³ÆÓĞÖúÓÚ±êÊ¶×Ô¼º£º\n","ÌáÊ¾",JOptionPane.PLAIN_MESSAGE,null,null,"ÄäÃû").toString();
+				JOptionPane.showInputDialog(null,"è¾“å…¥æ˜µç§°æœ‰åŠ©äºæ ‡è¯†è‡ªå·±ï¼š\n","æç¤º",JOptionPane.PLAIN_MESSAGE,null,null,"åŒ¿å").toString();
 		}catch(Exception e){
-			name = "ÄäÃû";
+			name = "åŒ¿å";
 		}
 		if(name.replaceAll(" ", "").length()==0)
-			name = "ÄäÃû";
+			name = "åŒ¿å";
 		user.setId(handler.getID());
 		user.setIp(handler.getIp());
 		user.setLocalPort(handler.getPort());
 		user.setNickName(name);
-		handler.register(user.getId(),user);//×¢²á¹ÜµÀ
+		handler.register(user.getId(),user);//æ³¨å†Œç®¡é“
 		handler.requestList();
 	}
 	public void createRoom(String roomName){
@@ -89,7 +89,7 @@ public class Base {
 			}
 		}
 		if(num==4){
-			showError("»ñÈ¡²»µ½·¿¼ä");
+			showError("è·å–ä¸åˆ°æˆ¿é—´");
 			return;
 		}
 		client.setRoomTitle(title);
@@ -104,14 +104,14 @@ public class Base {
 	public void intoRoom(String homeTitle){
 		if(homeTitle.indexOf('[')==0){
 			String reg = "\\[(\\d+)\\]";
-			Pattern pattern = Pattern.compile(reg);//ÑùÊ½
-			Matcher matcher = pattern.matcher(homeTitle);//Æ¥Åä
+			Pattern pattern = Pattern.compile(reg);//æ ·å¼
+			Matcher matcher = pattern.matcher(homeTitle);//åŒ¹é…
 			if(matcher.find()){
 				int roomNum = Integer.valueOf(matcher.group(1));
 				handler.intoRoom(roomNum);
 			}
 		}else{
-			System.out.println("µÈ´ı´´½¨·¿¼ä");
+			System.out.println("ç­‰å¾…åˆ›å»ºæˆ¿é—´");
 			while(homeTitle.indexOf('[')!=0){
 				try {
 					Thread.sleep(500);
@@ -120,11 +120,11 @@ public class Base {
 					e1.printStackTrace();
 				}
 			}
-			System.out.println("´´½¨³É¹¦");
+			System.out.println("åˆ›å»ºæˆåŠŸ");
 		}
 	}
 	public void setTree(int roomNum,String[] list){
-		//¹ã³¡ÓÃ»§ÁĞ±í
+		//å¹¿åœºç”¨æˆ·åˆ—è¡¨
 		if(roomNum==Protocol_Config.ROOMNUM_GROUND){
 			getRoomList().setTree(list);
 		}else{
@@ -153,10 +153,10 @@ public class Base {
 		privateChatListDialog.setVisible(visible);
 	}
 	public void receiveMess(int roomNum,String nickname,String mess){
-		//¹ã³¡ÏûÏ¢
+		//å¹¿åœºæ¶ˆæ¯
 		if(roomNum==Protocol_Config.ROOMNUM_GROUND){
 			getRoomList().receiceMess(nickname, mess);
-		//Ë½ÁÄÏûÏ¢
+		//ç§èŠæ¶ˆæ¯
 		}else if(roomNum==Protocol_Config.ROOMNUM_PRIVATE_CHAT){
 			String id = nickname.substring(nickname.lastIndexOf("/"),nickname.lastIndexOf(")"));
 			PrivateChat pc = getPrivateChatById(id);
@@ -180,7 +180,7 @@ public class Base {
 						getRoomList().setLabChaterListVisible(true);
 				}
 			}
-		//ÁÄÌìÊÒÏûÏ¢	
+		//èŠå¤©å®¤æ¶ˆæ¯	
 		}else{
 			RoomChatClient client = getClientByNum(roomNum);
 			client.receiceMess(nickname,mess);
@@ -218,13 +218,13 @@ public class Base {
 		return user.getNickName();
 	}
 	
-	//½øÈëË½ÁÄ½çÃæ
+	//è¿›å…¥ç§èŠç•Œé¢
 	public void gotoPrivateChat(String nickName){
 		String id = nickName.substring(nickName.lastIndexOf("/"),nickName.lastIndexOf(")"));
 		PrivateChat waitPc = getWaitPrivateChatById(id);
 		PrivateChat pc = getPrivateChatById(id);
 		if(waitPc!=null){
-			waitPc.setExtendedState(JFrame.NORMAL);//×î´ó»¯
+			waitPc.setExtendedState(JFrame.NORMAL);//æœ€å¤§åŒ–
 			/*waitPc.setAlwaysOnTop(true);
 			waitPc.setAlwaysOnTop(false);*/
 			waitPc.setChaterName(nickName);
@@ -237,7 +237,7 @@ public class Base {
 			return;
 		}
 		if(pc!=null){
-			pc.setExtendedState(JFrame.NORMAL);//×î´ó»¯
+			pc.setExtendedState(JFrame.NORMAL);//æœ€å¤§åŒ–
 			/*pc.setAlwaysOnTop(true);
 			pc.setAlwaysOnTop(false);*/
 			pc.setChaterName(nickName);
@@ -247,23 +247,23 @@ public class Base {
 			privateChatList.add(new PrivateChat(this, nickName));
 		}
 	}
-	//ÌßÈË
+	//è¸¢äºº
 	public void kickUser(int roomNum,String id){
 		handler.kickUser(roomNum, id);
 	}
-	//±»Ìß
+	//è¢«è¸¢
 	public void beKicked(int roomNum){
 		RoomChatClient client = getClientByNum(roomNum);
 		if(client==null)
 			return;
-		showError("Äã±»Ìß³ö·¿¼ä£º"+client.getTitle());
+		showError("ä½ è¢«è¸¢å‡ºæˆ¿é—´ï¼š"+client.getTitle());
 		frameList.remove(client);
 		client.dispose();
 	}
 /*	public void closePrivateChat(String id){
 		privateChatList.remove(getPrivateChatById(id));
 	}*/
-	//¸ù¾İÁªÏµÈËid»ñÈ¡Ë½ÁÄ½çÃæ
+	//æ ¹æ®è”ç³»äººidè·å–ç§èŠç•Œé¢
 	public PrivateChat getPrivateChatById(String id){
 		for(PrivateChat pri:privateChatList){
 			if(pri.getChaterId().equals(id))
@@ -271,7 +271,7 @@ public class Base {
 		}
 		return null;
 	}
-	//¸ù¾İÁªÏµÈËid»ñÈ¡Ë½ÁÄ½çÃæ
+	//æ ¹æ®è”ç³»äººidè·å–ç§èŠç•Œé¢
 		public PrivateChat getWaitPrivateChatById(String id){
 			for(PrivateChat pri:waitLookPrivateChatList){
 				if(pri.getChaterId().equals(id))
@@ -280,7 +280,7 @@ public class Base {
 			return null;
 		}
 	
-	//¸ù¾İ·¿¼äºÅ»ñÈ¡¿Í»§¶Ë
+	//æ ¹æ®æˆ¿é—´å·è·å–å®¢æˆ·ç«¯
 	public RoomChatClient getClientByNum(int roomNum){
 		for(RoomChatClient client:frameList){
 			if(client.getRoomNum()==roomNum){
@@ -291,8 +291,9 @@ public class Base {
 	}
 	public void showError(String mess){
 		if(mess==null)
-			mess = "·şÎñÆ÷±¨¸æÁËÒ»¸ö´íÎóÏûÏ¢";
-		JOptionPane.showMessageDialog(null, mess, "ÌáÊ¾", JOptionPane.CLOSED_OPTION, null);
+			mess = "æœåŠ¡å™¨æŠ¥å‘Šäº†ä¸€ä¸ªé”™è¯¯æ¶ˆæ¯";
+		JOptionPane.showMessageDialog(null, mess, "æç¤º", JOptionPane.CLOSED_OPTION, null);
 	}
 }
 
+                                                                                                                                                                                                    
