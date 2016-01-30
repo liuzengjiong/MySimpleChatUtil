@@ -27,10 +27,10 @@ import server.Protocol_Config;
 import util.AttributeSetUtil;
 
 /**
- * @TODOï¼š
+ * @TODO£º
  * @fileName : client.PrivateChat.java
  * date | author | version |   
- * 2015å¹´11æœˆ14æ—¥ | Jiong | 1.0 |
+ * 2015Äê11ÔÂ14ÈÕ | Jiong | 1.0 |
  */
 public class PrivateChat extends JFrame {
 	private JSplitPane chatGroundPane = null;
@@ -41,7 +41,7 @@ public class PrivateChat extends JFrame {
 	private JScrollPane inputPane = null;
 	private JTextArea inputArea = null;
 	private JButton btnOk = null;
-	StyledDocument doc;//èŠå¤©çª—å£çš„é£æ ¼(JTextPane)
+	StyledDocument doc;//ÁÄÌì´°¿ÚµÄ·ç¸ñ(JTextPane)
 	
 	private Base base;
 	private String _chaterName;
@@ -57,7 +57,7 @@ public class PrivateChat extends JFrame {
 	private JPanel getBottomPane(){
 		if (bottomPane == null) {
 			JLabel lblSend = new JLabel();
-			lblSend.setText("è¾“å…¥ï¼š");
+			lblSend.setText("ÊäÈë£º");
 			lblSend.setBounds(new Rectangle(9, 11, 39, 18));
 			bottomPane = new JPanel();
 			bottomPane.setLayout(null);
@@ -70,7 +70,7 @@ public class PrivateChat extends JFrame {
 	private JButton getBtnOk(){
 		if (btnOk == null) {
 			btnOk = new JButton();
-			btnOk.setText("å‘é€");
+			btnOk.setText("·¢ËÍ");
 			btnOk.setLocation(new Point(420, 28));
 			btnOk.setSize(new Dimension(60, 22));
 			btnOk.setPreferredSize(new Dimension(60, 22));
@@ -107,7 +107,7 @@ public class PrivateChat extends JFrame {
 		}
 		return inputArea;
 	}
-	//æ¶ˆæ¯æ»šåŠ¨ç›˜
+	//ÏûÏ¢¹ö¶¯ÅÌ
 		private JScrollPane getMsgPane(){
 			if(messagePane==null){
 				messagePane = new JScrollPane();
@@ -115,7 +115,7 @@ public class PrivateChat extends JFrame {
 			}
 			return messagePane;
 		}
-		//æ¶ˆæ¯å†…å®¹ç›˜
+		//ÏûÏ¢ÄÚÈİÅÌ
 		private JTextPane getMsgContent(){
 			if(messageText==null){
 				messageText = new JTextPane();
@@ -123,7 +123,7 @@ public class PrivateChat extends JFrame {
 			}
 			return messageText;
 		}
-		//èŠå¤©éƒ¨åˆ†
+		//ÁÄÌì²¿·Ö
 		private JSplitPane getChatGroundPane(){
 			if(chatGroundPane==null){
 				chatGroundPane = new JSplitPane();
@@ -141,7 +141,7 @@ public class PrivateChat extends JFrame {
 	    	}
 	    	return s;
 	    }
-		//æ•æ„Ÿè¯è¿‡æ»¤
+		//Ãô¸Ğ´Ê¹ıÂË
 		 private String warningChecked(String mess){
 		    	String[] list = base.getWarningWord();
 				if(list==null){
@@ -158,7 +158,7 @@ public class PrivateChat extends JFrame {
 		public void sendMess(){
 			String str = inputArea.getText();
 			if(str.replaceAll(" ", "").length()==0){
-				sysMess("è¯·å‘é€æœ‰æ„ä¹‰çš„æ¶ˆæ¯");
+				sysMess("Çë·¢ËÍÓĞÒâÒåµÄÏûÏ¢");
 				return;
 			}
 			Date date=new Date(System.currentTimeMillis());
@@ -204,7 +204,7 @@ public class PrivateChat extends JFrame {
 		}
 		public void sysMess(String mess){
 			try {
-				mess = "ç³»ç»Ÿæç¤ºï¼š"+mess;
+				mess = "ÏµÍ³ÌáÊ¾£º"+mess;
 				if(messageText.getText().length()!=0){
 			    	getDocStyle().insertString(doc.getLength(), "\r\n", null);
 				}
@@ -230,12 +230,12 @@ public class PrivateChat extends JFrame {
 			init();	
 		}
 		private void init(){
-			setTitle("ç§èŠ----"+_chaterName);
+			setTitle("Ë½ÁÄ----"+_chaterName);
 			setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-			//ç‚¹çª—å£Ã—å·çš„äº‹ä»¶
+			//µã´°¿Ú¡ÁºÅµÄÊÂ¼ş
 			/*addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				int n = JOptionPane.showConfirmDialog(null, "ç¡®å®šå…³é—­èŠå¤©çª—å£å—", "æç¤º",JOptionPane.YES_NO_OPTION);
+				int n = JOptionPane.showConfirmDialog(null, "È·¶¨¹Ø±ÕÁÄÌì´°¿ÚÂğ", "ÌáÊ¾",JOptionPane.YES_NO_OPTION);
 				if(n==0){
 					dispose();
 					//base.closePrivateChat(_chaterId);
@@ -243,7 +243,7 @@ public class PrivateChat extends JFrame {
 			}
 			});*/
 			setResizable(false);
-			System.out.println("æˆ¿é—´åˆ—è¡¨");
+			System.out.println("·¿¼äÁĞ±í");
 			Container container = getContentPane();
 			container.add(getChatGroundPane());
 			this.setSize(500,500);
@@ -265,4 +265,3 @@ public class PrivateChat extends JFrame {
 		
 }
 
-                                                                          
