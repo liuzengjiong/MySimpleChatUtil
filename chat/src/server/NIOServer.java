@@ -1,6 +1,7 @@
 package server;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -18,24 +19,25 @@ import java.util.Map;
 import model.User;
 
 /**
- * @TODO£ºsocketChannel·şÎñÆ÷
+ * @TODOï¼šsocketChannelæœåŠ¡å™¨
  * @fileName : .Protocol_Config.java
  * date | author | version |   
- * 2015Äê10ÔÂ31ÈÕ | Jiong | 1.0 |
+ * 2015å¹´10æœˆ31æ—¥ | Jiong | 1.0 |
  */
 public class NIOServer extends Protocol_DataExpress{
-	//Í¨µÀ¹ÜÀíÆ÷  
+	//é€šé“ç®¡ç†å™¨  
     private Selector selector;
     String path = System.getProperty("user.dir");
     String warningWordPath = path + "\\warningWord.txt";
+    String accountPath = path + "\\account.txt"; //ä¿å­˜ç”¨æˆ·è´¦å·
     
-    //TODO¡¡ÒÔÏÂÎªÁÄÌìĞÂÔö²ÎÊı
+    //TODOã€€ä»¥ä¸‹ä¸ºèŠå¤©æ–°å¢å‚æ•°
     private List<ChatRoom> crList = new ArrayList<ChatRoom>();
     private Map<String,User> userMap = new HashMap<String,User>();
     private Map<String,SocketChannel> channelMap = new HashMap<String,SocketChannel>();
     int maxRoomNum = 0;
     /** 
-     * Æô¶¯·şÎñ¶Ë²âÊÔ 
+     * å¯åŠ¨æœåŠ¡ç«¯æµ‹è¯• 
      * @throws IOException  
      */  
     public static void main(String[] args) throws IOException {  
@@ -45,62 +47,62 @@ public class NIOServer extends Protocol_DataExpress{
     }  
     
     /** 
-     * »ñµÃÒ»¸öServerSocketÍ¨µÀ£¬²¢¶Ô¸ÃÍ¨µÀ×öÒ»Ğ©³õÊ¼»¯µÄ¹¤×÷ 
-     * @param port  °ó¶¨µÄ¶Ë¿ÚºÅ 
+     * è·å¾—ä¸€ä¸ªServerSocketé€šé“ï¼Œå¹¶å¯¹è¯¥é€šé“åšä¸€äº›åˆå§‹åŒ–çš„å·¥ä½œ 
+     * @param port  ç»‘å®šçš„ç«¯å£å· 
      * @throws IOException 
      */  
     public void initServer(int port) throws IOException {  
-        // »ñµÃÒ»¸öServerSocketÍ¨µÀ  
+        // è·å¾—ä¸€ä¸ªServerSocketé€šé“  
         ServerSocketChannel serverChannel = ServerSocketChannel.open();  
-        // ÉèÖÃÍ¨µÀÎª·Ç×èÈû  
+        // è®¾ç½®é€šé“ä¸ºéé˜»å¡  
         serverChannel.configureBlocking(false);  
-        // ½«¸ÃÍ¨µÀ¶ÔÓ¦µÄServerSocket°ó¶¨µ½port¶Ë¿Ú  
+        // å°†è¯¥é€šé“å¯¹åº”çš„ServerSocketç»‘å®šåˆ°portç«¯å£  
         serverChannel.socket().bind(new InetSocketAddress(port));  
-        // »ñµÃÒ»¸öÍ¨µÀ¹ÜÀíÆ÷  
+        // è·å¾—ä¸€ä¸ªé€šé“ç®¡ç†å™¨  
         this.selector = Selector.open();  
-        //½«Í¨µÀ¹ÜÀíÆ÷ºÍ¸ÃÍ¨µÀ°ó¶¨£¬²¢Îª¸ÃÍ¨µÀ×¢²áSelectionKey.OP_ACCEPTÊÂ¼ş,×¢²á¸ÃÊÂ¼şºó£¬  
-        //µ±¸ÃÊÂ¼şµ½´ïÊ±£¬selector.select()»á·µ»Ø£¬Èç¹û¸ÃÊÂ¼şÃ»µ½´ïselector.select()»áÒ»Ö±×èÈû¡£  
+        //å°†é€šé“ç®¡ç†å™¨å’Œè¯¥é€šé“ç»‘å®šï¼Œå¹¶ä¸ºè¯¥é€šé“æ³¨å†ŒSelectionKey.OP_ACCEPTäº‹ä»¶,æ³¨å†Œè¯¥äº‹ä»¶åï¼Œ  
+        //å½“è¯¥äº‹ä»¶åˆ°è¾¾æ—¶ï¼Œselector.select()ä¼šè¿”å›ï¼Œå¦‚æœè¯¥äº‹ä»¶æ²¡åˆ°è¾¾selector.select()ä¼šä¸€ç›´é˜»å¡ã€‚  
         serverChannel.register(selector, SelectionKey.OP_ACCEPT);  
     }  
   
     /** 
-     * ²ÉÓÃÂÖÑ¯µÄ·½Ê½¼àÌıselectorÉÏÊÇ·ñÓĞĞèÒª´¦ÀíµÄÊÂ¼ş£¬Èç¹ûÓĞ£¬Ôò½øĞĞ´¦Àí 
+     * é‡‡ç”¨è½®è¯¢çš„æ–¹å¼ç›‘å¬selectorä¸Šæ˜¯å¦æœ‰éœ€è¦å¤„ç†çš„äº‹ä»¶ï¼Œå¦‚æœæœ‰ï¼Œåˆ™è¿›è¡Œå¤„ç† 
      * @throws IOException 
      */  
     public void listen() throws IOException {  
-        System.out.println("·şÎñ¶ËÆô¶¯³É¹¦£¡");  
-        // ÂÖÑ¯·ÃÎÊselector  
+        System.out.println("æœåŠ¡ç«¯å¯åŠ¨æˆåŠŸï¼");  
+        // è½®è¯¢è®¿é—®selector  
         try{
         	//SocketChannel temp = null;
 	        while (true) {
-	            //µ±×¢²áµÄÊÂ¼şµ½´ïÊ±£¬·½·¨·µ»Ø£»·ñÔò,¸Ã·½·¨»áÒ»Ö±×èÈû  
+	            //å½“æ³¨å†Œçš„äº‹ä»¶åˆ°è¾¾æ—¶ï¼Œæ–¹æ³•è¿”å›ï¼›å¦åˆ™,è¯¥æ–¹æ³•ä¼šä¸€ç›´é˜»å¡  
 	            selector.select();  
-	            // »ñµÃselectorÖĞÑ¡ÖĞµÄÏîµÄµü´úÆ÷£¬Ñ¡ÖĞµÄÏîÎª×¢²áµÄÊÂ¼ş  
+	            // è·å¾—selectorä¸­é€‰ä¸­çš„é¡¹çš„è¿­ä»£å™¨ï¼Œé€‰ä¸­çš„é¡¹ä¸ºæ³¨å†Œçš„äº‹ä»¶  
 	            Iterator ite = this.selector.selectedKeys().iterator();  
 	            while (ite.hasNext()) {  
 	            	
 	                SelectionKey selectionKey = (SelectionKey) ite.next();
-	                //TODO ÕâÀïÊÇÎªÁË²¶»ñ¿Í»§¶ËµÄ·ÇÕı³£¹Ø±Õ
+	                //TODO è¿™é‡Œæ˜¯ä¸ºäº†æ•è·å®¢æˆ·ç«¯çš„éæ­£å¸¸å…³é—­
 	                try{
-		                // É¾³ıÒÑÑ¡µÄkey,ÒÔ·ÀÖØ¸´´¦Àí  
+		                // åˆ é™¤å·²é€‰çš„key,ä»¥é˜²é‡å¤å¤„ç†  
 		                ite.remove();  
-		                // ¿Í»§¶ËÇëÇóÁ¬½ÓÊÂ¼ş  
+		                // å®¢æˆ·ç«¯è¯·æ±‚è¿æ¥äº‹ä»¶  
 		                if (selectionKey.isAcceptable()) {  
 		                    ServerSocketChannel server = (ServerSocketChannel) selectionKey  
 		                            .channel();  
-		                    // »ñµÃºÍ¿Í»§¶ËÁ¬½ÓµÄÍ¨µÀ  
+		                    // è·å¾—å’Œå®¢æˆ·ç«¯è¿æ¥çš„é€šé“  
 		                    SocketChannel channel = server.accept(); 
 		                    //temp = channel;
-		                    System.out.println("È¡µÃºÍÒ»¸ö¿Í»§¶ËµÄÁ¬½Ó");
-		                    // ÉèÖÃ³É·Ç×èÈû  
+		                    System.out.println("å–å¾—å’Œä¸€ä¸ªå®¢æˆ·ç«¯çš„è¿æ¥");
+		                    // è®¾ç½®æˆéé˜»å¡  
 		                    channel.configureBlocking(false);  
 		  
-		                    //ÔÚÕâÀï¿ÉÒÔ¸ø¿Í»§¶Ë·¢ËÍĞÅÏ¢Å¶  
-		                    //channel.write(ByteBuffer.wrap(new String("Ïò¿Í»§¶Ë·¢ËÍÁËÒ»ÌõĞÅÏ¢").getBytes()));  
-		                    //ÔÚºÍ¿Í»§¶ËÁ¬½Ó³É¹¦Ö®ºó£¬ÎªÁË¿ÉÒÔ½ÓÊÕµ½¿Í»§¶ËµÄĞÅÏ¢£¬ĞèÒª¸øÍ¨µÀÉèÖÃ¶ÁµÄÈ¨ÏŞ¡£  
+		                    //åœ¨è¿™é‡Œå¯ä»¥ç»™å®¢æˆ·ç«¯å‘é€ä¿¡æ¯å“¦  
+		                    //channel.write(ByteBuffer.wrap(new String("å‘å®¢æˆ·ç«¯å‘é€äº†ä¸€æ¡ä¿¡æ¯").getBytes()));  
+		                    //åœ¨å’Œå®¢æˆ·ç«¯è¿æ¥æˆåŠŸä¹‹åï¼Œä¸ºäº†å¯ä»¥æ¥æ”¶åˆ°å®¢æˆ·ç«¯çš„ä¿¡æ¯ï¼Œéœ€è¦ç»™é€šé“è®¾ç½®è¯»çš„æƒé™ã€‚  
 		                    channel.register(this.selector, SelectionKey.OP_READ);  
 		                      
-		                    // »ñµÃÁË¿É¶ÁµÄÊÂ¼ş  
+		                    // è·å¾—äº†å¯è¯»çš„äº‹ä»¶  
 		                } else if (selectionKey.isReadable()) {  
 		                        read(selectionKey);  
 		                } 
@@ -111,7 +113,7 @@ public class NIOServer extends Protocol_DataExpress{
 	            			 selectionKey.cancel();
 	            			 temp.socket().close();
 	            			 temp.close();
-	            			 System.out.println("¹Ø±Õ");
+	            			 System.out.println("å…³é—­");
 	            		 }
 	                }
 	  
@@ -119,29 +121,29 @@ public class NIOServer extends Protocol_DataExpress{
         	 }
         }  catch(Exception e){
          	e.printStackTrace();
-         	System.out.println("´íÎó£¡£º"+e.getMessage());
+         	System.out.println("é”™è¯¯ï¼ï¼š"+e.getMessage());
          }
        
     }
     public void specialClose(SocketChannel channel){
-    	//TODO ¸üĞÂËùÓĞÓÃ»§µÄ·¿¼äÁĞ±í
+    	//TODO æ›´æ–°æ‰€æœ‰ç”¨æˆ·çš„æˆ¿é—´åˆ—è¡¨
         updateRoomList();
-    	//¹Ø±ÕÁÄÌìµÄ¿Í»§¶Ë
+    	//å…³é—­èŠå¤©çš„å®¢æˆ·ç«¯
     	closeClient(channel);
     }
     /** 
-     * ´¦Àí¶ÁÈ¡¿Í»§¶Ë·¢À´µÄĞÅÏ¢ µÄÊÂ¼ş 
+     * å¤„ç†è¯»å–å®¢æˆ·ç«¯å‘æ¥çš„ä¿¡æ¯ çš„äº‹ä»¶ 
      * @param key 
      * @throws IOException  
      */  
     public void read(SelectionKey key) throws IOException{  
-    	//System.out.println("µ½´ïread·½·¨");
-    	 // ·şÎñÆ÷¿É¶ÁÈ¡ÏûÏ¢:µÃµ½ÊÂ¼ş·¢ÉúµÄSocketÍ¨µÀ 
+    	//System.out.println("åˆ°è¾¾readæ–¹æ³•");
+    	 // æœåŠ¡å™¨å¯è¯»å–æ¶ˆæ¯:å¾—åˆ°äº‹ä»¶å‘ç”Ÿçš„Socketé€šé“ 
         SocketChannel channel = (SocketChannel) key.channel();  
-        //ÏÈ»ñÈ¡¶¯×÷Âë£¬ÅĞ¶ÏÒª½øĞĞÊ²Ã´¶¯×÷
+        //å…ˆè·å–åŠ¨ä½œç ï¼Œåˆ¤æ–­è¦è¿›è¡Œä»€ä¹ˆåŠ¨ä½œ
         int action = getInt(channel);
         //System.out.println("action:"+action);
-        //ÁÄÌìÊÒ
+        //èŠå¤©å®¤
         if(action>=2000&&action<=2999)
    	        switch(action){
    	        case Protocol_Config.REGISTER_CHANNEL:
@@ -164,27 +166,98 @@ public class NIOServer extends Protocol_DataExpress{
    	        	kickUser(channel);break;
    	        case Protocol_Config.CHANGE_INFO:
    	        	changeUser(channel);break;
+   	        case Protocol_Config.REGISTER_ACCOUNT:
+   	        	registerAccount(channel);break;
+   	        case Protocol_Config.LOGIN:
+   	        	login(channel);break;
    	        	default:
    	        		other(channel);break;
    	    }
     } 
     
-    //TODO ÁÄÌìÊÒÏà¹Ø
-    //TODO ×¢²á¹ÜµÀ
+    //TODO èŠå¤©å®¤ç›¸å…³
+    //TODO æ³¨å†Œè´¦å·
+    public void registerAccount(SocketChannel channel) throws IOException{
+    	String userId = getString(channel);
+    	String password = getString(channel);
+    	String nickname = getString(channel);
+    	for(int i=0;i<userId.length();i++){
+    		char c = userId.charAt(i);
+    		if(!((c>='0'&&c<='9')||(c>='a'&&c<='z')||(c>='A'&&c<='Z'))){
+    			registerFeedback(channel,"è´¦å·åªèƒ½ç”±å­—æ¯å’Œæ•°å­—æ„æˆ");
+    			return;
+    		}
+    	}
+    	List<String[]> list = getAccountList();
+    	for(String[] acc:list){
+    		if(acc[0].equals(userId)){
+    			registerFeedback(channel,"è´¦å·ï¼š"+userId+" å·²è¢«æ³¨å†Œ");
+    			return;
+    		}
+    	}
+    	addAccount(userId, password, nickname);
+    	registerFeedback(channel,"success");
+    }
+    //æ³¨å†Œåé¦ˆ
+    public void registerFeedback(SocketChannel channel,String mess){
+    	int length = 4 + 4 + mess.getBytes().length;
+    	buffer = ByteBuffer.allocateDirect(length);
+    	buffer.putInt(Protocol_Config.REGISTER_ACCOUNT);
+    	put(mess);
+    	writeBuffer(channel);
+    }
+    //ç™»é™†
+    public void login(SocketChannel channel) throws IOException{
+    	System.out.println("ç”¨æˆ·ç™»å½•");
+    	String userId = getString(channel);
+    	String password = getString(channel);
+    	List<String[]> list = getAccountList();
+    	for(String[] acc:list){
+    		if(acc[0].equals(userId)){
+    			//ç™»é™†æˆåŠŸ
+    			if(acc[1].equals(password)){
+    				if(userMap.get(userId)!=null){
+    					loginFail(channel,"è¯¥è´¦å·å·²ç™»å½•");
+    					return;
+    				}
+    				int length = 4 + 4 + acc[0].getBytes().length + 4 + acc[2].getBytes().length;
+    				buffer = ByteBuffer.allocateDirect(length);
+    				buffer.putInt(Protocol_Config.LOGIN_SUCCESS);
+    				put(acc[0]);
+    				put(acc[2]);
+    				writeBuffer(channel);
+    			}else{
+    				loginFail(channel,"å¯†ç ä¸æ­£ç¡®");
+    			}
+    			return;
+    		}
+    	}
+    	loginFail(channel,"è´¦æˆ·ä¸å­˜åœ¨");
+    }
+    //ç™»é™†å¤±è´¥
+    private void loginFail(SocketChannel channel,String mess){
+    	int length = 4 + 4 + mess.getBytes().length;
+    	buffer = ByteBuffer.allocateDirect(length);
+    	buffer.putInt(Protocol_Config.LOGIN_FAIL);
+    	put(mess);
+    	writeBuffer(channel);
+    }
+    //TODO æ³¨å†Œç®¡é“
     public void register(SocketChannel channel){
     	String id = getString(channel);
     	User user = (User) getObject(channel);
     	channelMap.put(id, channel);
     	userMap.put(id, user);
     	sendGroundUserList();
-    	System.out.println("ÔÚ·şÎñÆ÷ÖĞ×¢²á¹ÜµÀ");
+    	System.out.println("åœ¨æœåŠ¡å™¨ä¸­æ³¨å†Œç®¡é“");
     	sendWarningWord(channel);
     }
-    //TODO¡¡ÓÃ»§¸ü¸ÄĞÅÏ¢
-    public void changeUser(SocketChannel channel){
+    //TODOã€€ç”¨æˆ·æ›´æ”¹ä¿¡æ¯
+    public void changeUser(SocketChannel channel) throws IOException{
     	User user = (User) getObject(channel);
     	String id = user.getId();
     	userMap.put(id, user);
+    	changeAccount(id,user.getAbsoluteNickname());
     	sendGroundUserList();
     	for(ChatRoom room:crList){
     		if(room.isMember(channel)){
@@ -194,7 +267,7 @@ public class NIOServer extends Protocol_DataExpress{
         	}
     	}
     }
-    //TODO¡¡·µ»ØÃô¸Ğ´Ê¼¯ºÏ
+    //TODOã€€è¿”å›æ•æ„Ÿè¯é›†åˆ
     public void sendWarningWord(SocketChannel channel){
     	try {
 			String[] list = getWarningWord();
@@ -209,7 +282,7 @@ public class NIOServer extends Protocol_DataExpress{
 			e.printStackTrace();
 		}
     }
-    //TODO¡¡½¨·¿
+    //TODOã€€å»ºæˆ¿
     public void createChatRoom(SocketChannel channel){
     	String roomName = getString(channel);
     	ChatRoom room = new ChatRoom(++maxRoomNum,roomName);
@@ -221,25 +294,25 @@ public class NIOServer extends Protocol_DataExpress{
     	writeBuffer(channel);
     	setRoomTitle(channel,room);
     	roomList(channel);
-    	sendUserList(room.getChatRoomNum());//·¢ËÍÓÃ»§ÁĞ±í
-    	//¸üĞÂËùÓĞÓÃ»§µÄ·¿¼äÁĞ±í
+    	sendUserList(room.getChatRoomNum());//å‘é€ç”¨æˆ·åˆ—è¡¨
+    	//æ›´æ–°æ‰€æœ‰ç”¨æˆ·çš„æˆ¿é—´åˆ—è¡¨
     	updateRoomList();
-    	//ÉèÖÃÎª¹ÜÀíÔ±
-    	sendSysMess(room.getChatRoomNum(),"Äã´´½¨ÁËÁÄÌìÊÒ£º"+room.getChatRoomNum()+",ÄãÊÇ¹ÜÀíÔ±¡£", channel);
+    	//è®¾ç½®ä¸ºç®¡ç†å‘˜
+    	sendSysMess(room.getChatRoomNum(),"ä½ åˆ›å»ºäº†èŠå¤©å®¤ï¼š"+room.getChatRoomNum()+",ä½ æ˜¯ç®¡ç†å‘˜ã€‚", channel);
     	buffer = ByteBuffer.allocateDirect(8);
 		buffer.putInt(Protocol_Config.BE_ADMIN);
 		buffer.putInt(room.getChatRoomNum());
 		writeBuffer(channel);
     }
-    //TODO¡¡ÁÄÌìÊÒÁĞ±í
+    //TODOã€€èŠå¤©å®¤åˆ—è¡¨
     public void roomList(SocketChannel channel){
-    	System.out.println("·¢ËÍ·¿¼äÁĞ±í");
+    	//System.out.println("å‘é€æˆ¿é—´åˆ—è¡¨");
     	String[] str = new String[crList.size()];
     	for(int i=0;i<crList.size();i++){
     		str[i] = "["+crList.get(i).getChatRoomNum()+"]  "+crList.get(i).getRoomName()
-    				+"  ("+crList.get(i).getPartNum()+" ÈËÔÚÏß)";
+    				+"  ("+crList.get(i).getPartNum()+" äººåœ¨çº¿)";
     		if(crList.get(i).isMember(channel))
-    			str[i] = str[i] + "(ÒÑ½øÈë)";
+    			str[i] = str[i] + "(å·²è¿›å…¥)";
     	}
     	byte[] bytes;
 		try {
@@ -254,31 +327,31 @@ public class NIOServer extends Protocol_DataExpress{
 			e.printStackTrace();
 		}
     }
-    //TODO¡¡½øÈëÁÄÌìÊÒ
+    //TODOã€€è¿›å…¥èŠå¤©å®¤
     public void intoRoom(SocketChannel channel){
     	try {
 			int roomNum = getInt(channel);
 			ChatRoom room = getRoomByNum(roomNum);
 			if(room==null)
-				sysError(channel, "¸ÃÁÄÌìÊÒ²»´æÔÚ£¡");
+				sysError(channel, "è¯¥èŠå¤©å®¤ä¸å­˜åœ¨ï¼");
 			room.addUser(channel);
 			buffer = ByteBuffer.allocateDirect(8);
 	    	buffer.putInt(Protocol_Config.CREATE_ROOM_SUCCESS);
 	    	buffer.putInt(room.getChatRoomNum());
 	    	writeBuffer(channel);
 			setRoomTitle(channel, room);
-			//¸üĞÂËùÓĞÓÃ»§µÄ·¿¼äÁĞ±í
+			//æ›´æ–°æ‰€æœ‰ç”¨æˆ·çš„æˆ¿é—´åˆ—è¡¨
 	    	updateRoomList();
-			sendUserList(roomNum);//·¢ËÍÓÃ»§ÁĞ±í
-			sendSysMessWithoutSelf(roomNum,getUserNameByChannel(channel)+"½øÈëÁË·¿¼ä",channel);
-			sendSysMess(roomNum,"Äã½øÈëÁË·¿¼ä£º["+roomNum+"]"+room.getRoomName(),channel);
+			sendUserList(roomNum);//å‘é€ç”¨æˆ·åˆ—è¡¨
+			sendSysMessWithoutSelf(roomNum,getUserNameByChannel(channel)+"è¿›å…¥äº†æˆ¿é—´",channel);
+			sendSysMess(roomNum,"ä½ è¿›å…¥äº†æˆ¿é—´ï¼š["+roomNum+"]"+room.getRoomName(),channel);
     	} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }
     public void setRoomTitle(SocketChannel channel,ChatRoom room){
-    	String title = "ÁÄÌìÊÒ£º["+room.getChatRoomNum()+"]   "+room.getRoomName();
+    	String title = "èŠå¤©å®¤ï¼š["+room.getChatRoomNum()+"]   "+room.getRoomName();
     	int length  = 4 + 4 + 4 + title.getBytes().length;
     	buffer = ByteBuffer.allocateDirect(length);
     	buffer.putInt(Protocol_Config.SET_ROOM_TITLE);
@@ -286,14 +359,14 @@ public class NIOServer extends Protocol_DataExpress{
     	put(title);
     	writeBuffer(channel);
     }
-    //TODO ·¢ËÍË½ÁÄÏûÏ¢
+    //TODO å‘é€ç§èŠæ¶ˆæ¯
     public void privateChat(int roomNum,SocketChannel channel){
-    	String id = getString(channel); //´ËÊ±ÊÇid
+    	String id = getString(channel); //æ­¤æ—¶æ˜¯id
 		String mess = getString(channel);
 		SocketChannel chater = channelMap.get(id);
-		//¶Ô·½²»ÔÚÏß
+		//å¯¹æ–¹ä¸åœ¨çº¿
 		if(chater==null){
-			sendPrivateSysMess(id,"¶Ô·½²»ÔÚÏß£¬ÎŞ·¨½ÓÊÕÄãµÄÏûÏ¢", channel);
+			sendPrivateSysMess(id,"å¯¹æ–¹ä¸åœ¨çº¿ï¼Œæ— æ³•æ¥æ”¶ä½ çš„æ¶ˆæ¯", channel);
 		}
 		String me = getUserNameByChannel(channel);
 		mess = warningChecked(roomNum, mess, channel,id);
@@ -306,11 +379,11 @@ public class NIOServer extends Protocol_DataExpress{
 		writeBuffer(chater);
 		
     }
-    //TODO¡¡·¢ËÍÈºÁÄºÍ¹ã³¡ÏûÏ¢
+    //TODOã€€å‘é€ç¾¤èŠå’Œå¹¿åœºæ¶ˆæ¯
     public void chatMess(SocketChannel channel){
     	try {
 			int roomNum = getInt(channel);
-			//Ë½ÁÄ×ªµ½ÁíÒ»·½·¨´¦Àí
+			//ç§èŠè½¬åˆ°å¦ä¸€æ–¹æ³•å¤„ç†
 			if(roomNum==Protocol_Config.ROOMNUM_PRIVATE_CHAT){
 				privateChat(roomNum,channel);
 				return;
@@ -319,11 +392,11 @@ public class NIOServer extends Protocol_DataExpress{
 			String mess = getString(channel);
 			mess = warningChecked(roomNum, mess, channel,null);
 			int length = 4 + 4 + nickname.getBytes().length + 4 + mess.getBytes().length + 4;
-			//ÁÄÌì¹ã³¡µÄÏûÏ¢
+			//èŠå¤©å¹¿åœºçš„æ¶ˆæ¯
 			if(roomNum==Protocol_Config.ROOMNUM_GROUND){
 				for(String id:channelMap.keySet()){
 					SocketChannel chan = channelMap.get(id);
-					if(chan.equals(channel))//²»·¢ËÍ¸ø×Ô¼º
+					if(chan.equals(channel))//ä¸å‘é€ç»™è‡ªå·±
 						continue;
 					buffer = ByteBuffer.allocateDirect(length);
 					buffer.putInt(Protocol_Config.CHAT_MESS);
@@ -332,7 +405,7 @@ public class NIOServer extends Protocol_DataExpress{
 					put(mess);
 					writeBuffer(chan);
 				}
-			//ÁÄÌìÊÒµÄÏûÏ¢
+			//èŠå¤©å®¤çš„æ¶ˆæ¯
 			}else{
 				ChatRoom room = getRoomByNum(roomNum);
 				for(SocketChannel chan:room.getUsersList()){
@@ -351,7 +424,7 @@ public class NIOServer extends Protocol_DataExpress{
 			e.printStackTrace();
 		}	
     }
-    //ÇëÇó·¿¼äÁĞ±í
+    //è¯·æ±‚æˆ¿é—´åˆ—è¡¨
 /*    private void userList(SocketChannel channel){
     	try {
 			int roomNum = getInt(channel);
@@ -362,7 +435,7 @@ public class NIOServer extends Protocol_DataExpress{
 		}
     	
     }*/
-    //TODO¡¡·¢ËÍ¹ã³¡µÄÓÃ»§ÁĞ±í
+    //TODOã€€å‘é€å¹¿åœºçš„ç”¨æˆ·åˆ—è¡¨
     private void sendGroundUserList(){
     	String[] list = getGroundUserList();
     	for(String id:channelMap.keySet()){
@@ -382,7 +455,7 @@ public class NIOServer extends Protocol_DataExpress{
     	}
     }
     
-    //TODO¡¡·¢ËÍ·¿¼äµÄÓÃ»§ÁĞ±í
+    //TODOã€€å‘é€æˆ¿é—´çš„ç”¨æˆ·åˆ—è¡¨
     private void sendUserList(int roomNum){
     	String[] list = getUserListInRoom(getRoomByNum(roomNum));
     	for(SocketChannel channel:getRoomByNum(roomNum).getUsersList()){
@@ -401,7 +474,7 @@ public class NIOServer extends Protocol_DataExpress{
     	}
     	
     }
-    //TODO¡¡·µ»Ø·¿¼äµÄÓÃ»§êÇ³ÆÊı×é
+    //TODOã€€è¿”å›æˆ¿é—´çš„ç”¨æˆ·æ˜µç§°æ•°ç»„
     private String[] getUserListInRoom(ChatRoom room){
     	List<SocketChannel> userList = room.getUsersList();
     	String[] list = new String[userList.size()];
@@ -411,7 +484,7 @@ public class NIOServer extends Protocol_DataExpress{
     	}
     	return list;
     }
-    //TODO¡¡·µ»Ø20¸öÒÔÄÚµÄËùÓĞÓÃ»§Êı×é
+    //TODOã€€è¿”å›20ä¸ªä»¥å†…çš„æ‰€æœ‰ç”¨æˆ·æ•°ç»„
     private String[] getGroundUserList(){
     	int num = userMap.size();
     	if(num>20)
@@ -426,9 +499,9 @@ public class NIOServer extends Protocol_DataExpress{
     	}
     	return list;
     }
-  //TODO Í¨¹ıÍ¨µÀ»ñÈ¡ÓÃ»§id
+  //TODO é€šè¿‡é€šé“è·å–ç”¨æˆ·id
     private String getUserIdByChannel(SocketChannel channel){
-    	//È·¶¨channelMapÖĞÊÇÒ»Ò»¶ÔÓ¦µÄ£¬¿ÉÓÉvalue»ñÈ¡key
+    	//ç¡®å®šchannelMapä¸­æ˜¯ä¸€ä¸€å¯¹åº”çš„ï¼Œå¯ç”±valueè·å–key
     	for(String id:channelMap.keySet()){
     		if(channelMap.get(id).equals(channel)){
     			return id;
@@ -436,18 +509,18 @@ public class NIOServer extends Protocol_DataExpress{
     	}
     	return null;
     }
-    //TODO Í¨¹ıÍ¨µÀ»ñÈ¡ÓÃ»§Ãû
+    //TODO é€šè¿‡é€šé“è·å–ç”¨æˆ·å
     private String getUserNameByChannel(SocketChannel channel){
     	return userMap.get(getUserIdByChannel(channel)).getNickName();
     }
-    //TODO¡¡¶Ô·¿¼ä·¢ËÍÏµÍ³ÏûÏ¢
+    //TODOã€€å¯¹æˆ¿é—´å‘é€ç³»ç»Ÿæ¶ˆæ¯
     private void sendSysMessToRoom(int homeNum,String mess){
     	ChatRoom  room = getRoomByNum(homeNum);
     	for(SocketChannel channel:room.getUsersList()){
     		sendSysMess(homeNum,mess,channel);
     	}
     }
-    //TODO¡¡·¢ËÍ³ı±¾ÈËÍâµÄÏµÍ³ÏûÏ¢
+    //TODOã€€å‘é€é™¤æœ¬äººå¤–çš„ç³»ç»Ÿæ¶ˆæ¯
     private void sendSysMessWithoutSelf(int homeNum,String mess,SocketChannel channel){
     	ChatRoom  room = getRoomByNum(homeNum);
     	for(SocketChannel chan:room.getUsersList()){
@@ -456,7 +529,7 @@ public class NIOServer extends Protocol_DataExpress{
     		sendSysMess(homeNum,mess,chan);
     	}
     }
-    //TODO ·¢ËÍÏµÍ³ÏûÏ¢
+    //TODO å‘é€ç³»ç»Ÿæ¶ˆæ¯
     private void sendSysMess(int homeNum,String mess,SocketChannel channel){
     	int length = 4 + 4 + mess.getBytes().length + 4;
     	buffer = ByteBuffer.allocateDirect(length);
@@ -465,7 +538,7 @@ public class NIOServer extends Protocol_DataExpress{
     	put(mess);
     	writeBuffer(channel);
     }
-    //TODO ·¢ËÍË½ÁÄ½çÃæµÄÏµÍ³ÏûÏ¢
+    //TODO å‘é€ç§èŠç•Œé¢çš„ç³»ç»Ÿæ¶ˆæ¯
     private void sendPrivateSysMess(String id,String mess,SocketChannel channel){
     	int length = 4 + id.getBytes().length + 4 + mess.getBytes().length + 4;
     	buffer = ByteBuffer.allocateDirect(length);
@@ -474,7 +547,7 @@ public class NIOServer extends Protocol_DataExpress{
     	put(mess);
     	writeBuffer(channel);
     }
-    //TODO Ìß³öÓÃ»§
+    //TODO è¸¢å‡ºç”¨æˆ·
     private void kickUser(SocketChannel channel){
     	try {
 			int roomNum = getInt(channel);
@@ -483,20 +556,20 @@ public class NIOServer extends Protocol_DataExpress{
 			SocketChannel userBeKicked = channelMap.get(id);
 			room.removeUser(userBeKicked);
 			sendUserList(room.getChatRoomNum());
-			sendSysMessToRoom(room.getChatRoomNum(),getUserNameByChannel(channel)+"Àë¿ªÁË·¿¼ä");
+			sendSysMessToRoom(room.getChatRoomNum(),getUserNameByChannel(channel)+"ç¦»å¼€äº†æˆ¿é—´");
 			updateRoomList();
 			buffer = ByteBuffer.allocateDirect(8);
 			buffer.putInt(Protocol_Config.KICK_USER);
 			buffer.putInt(roomNum);
 			writeBuffer(userBeKicked);
-			/*sysError(userBeKicked,"Äã±»¹ÜÀíÔ±Ìß³öÁÄÌìÊÒ£º["+roomNum+"]"+room.getRoomName());*/
+			/*sysError(userBeKicked,"ä½ è¢«ç®¡ç†å‘˜è¸¢å‡ºèŠå¤©å®¤ï¼š["+roomNum+"]"+room.getRoomName());*/
     	} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }
     
-    //TODO¡¡ÍË³öÁÄÌìÊÒ
+    //TODOã€€é€€å‡ºèŠå¤©å®¤
     private void exitRoom(SocketChannel channel){
     	try {
 			int roomNum = getInt(channel);
@@ -507,7 +580,7 @@ public class NIOServer extends Protocol_DataExpress{
 				crList.remove(room);
 			else{
 				sendUserList(room.getChatRoomNum());
-				sendSysMessToRoom(room.getChatRoomNum(),getUserNameByChannel(channel)+"Àë¿ªÁË·¿¼ä");
+				sendSysMessToRoom(room.getChatRoomNum(),getUserNameByChannel(channel)+"ç¦»å¼€äº†æˆ¿é—´");
 			}
 			updateRoomList();
 		} catch (IOException e) {
@@ -515,7 +588,7 @@ public class NIOServer extends Protocol_DataExpress{
 			e.printStackTrace();
 		}
     }
-    //TODO ÍË³ö¿Í»§¶Ë
+    //TODO é€€å‡ºå®¢æˆ·ç«¯
     private void exitClient(SocketChannel channel){
     	closeClient(channel);
     	try {
@@ -525,22 +598,22 @@ public class NIOServer extends Protocol_DataExpress{
 			e.printStackTrace();
 		}
     }
-    //TODO ¼ì²é¹ÜÀíÔ±ÊÇ·ñ¸Ä±ä
+    //TODO æ£€æŸ¥ç®¡ç†å‘˜æ˜¯å¦æ”¹å˜
     private void checkAdminChange(SocketChannel channel,ChatRoom room){
-    	//ÒªÍË³ö·¿¼äµÄÈËÊÇ¹ÜÀíÔ±
+    	//è¦é€€å‡ºæˆ¿é—´çš„äººæ˜¯ç®¡ç†å‘˜
     	if(room.isAdmin(channel)){
-    		//ÉèÖÃÏÂÒ»Ë³Î»µÄÓÃ»§Îª¹ÜÀíÔ±
+    		//è®¾ç½®ä¸‹ä¸€é¡ºä½çš„ç”¨æˆ·ä¸ºç®¡ç†å‘˜
     		if(room.getPartNum()>1){
     			SocketChannel admin = room.getUsersList().get(1);
     			buffer = ByteBuffer.allocateDirect(8);
     			buffer.putInt(Protocol_Config.BE_ADMIN);
     			buffer.putInt(room.getChatRoomNum());
     			writeBuffer(admin);
-    			sendSysMess(room.getChatRoomNum(),"Äã³ÉÎªÁË¹ÜÀíÔ±",admin);
+    			sendSysMess(room.getChatRoomNum(),"ä½ æˆä¸ºäº†ç®¡ç†å‘˜",admin);
     		}
     	}
     }
-    //TODO ¹Ø±Õ¿Í»§¶Ë
+    //TODO å…³é—­å®¢æˆ·ç«¯
     public void closeClient(SocketChannel channel){
     	List<ChatRoom> removeRoom = new ArrayList<ChatRoom>();
     	for(ChatRoom room:crList){
@@ -550,21 +623,21 @@ public class NIOServer extends Protocol_DataExpress{
     			if(room.getPartNum()==0)
     				removeRoom.add(room);
     			sendUserList(room.getChatRoomNum());
-    			sendSysMessToRoom(room.getChatRoomNum(),getUserNameByChannel(channel)+"Àë¿ªÁË·¿¼ä");
+    			sendSysMessToRoom(room.getChatRoomNum(),getUserNameByChannel(channel)+"ç¦»å¼€äº†æˆ¿é—´");
     		}
     	}
     	for(ChatRoom room:removeRoom){
-    		System.out.println("¹Ø±Õ·¿¼ä");
+    		System.out.println("å…³é—­æˆ¿é—´");
     		crList.remove(room);
     	}
-    	//ÒÆ³ı·şÎñÆ÷ÖĞ×¢²áµÄĞÅÏ¢
+    	//ç§»é™¤æœåŠ¡å™¨ä¸­æ³¨å†Œçš„ä¿¡æ¯
     	String id = getUserIdByChannel(channel);
     	userMap.remove(id);
     	channelMap.remove(id);
-    	//·¢ËÍ¹ã³¡ÓÃ»§ÁĞ±í
+    	//å‘é€å¹¿åœºç”¨æˆ·åˆ—è¡¨
     	sendGroundUserList();
     }
-    //TODO Ãô¸Ğ´Ê¹ıÂË(id£ºË½ÁÄÏûÏ¢Ê±²ÅĞèÓÃµ½£¬ÈºÁÄºÍ¹ã³¡Ê±idÎŞĞ§£©
+    //TODO æ•æ„Ÿè¯è¿‡æ»¤(idï¼šç§èŠæ¶ˆæ¯æ—¶æ‰éœ€ç”¨åˆ°ï¼Œç¾¤èŠå’Œå¹¿åœºæ—¶idæ— æ•ˆï¼‰
     private String warningChecked(int homeNum,String mess,SocketChannel channel,String id){
     	int num = 0;
     	try {
@@ -583,19 +656,19 @@ public class NIOServer extends Protocol_DataExpress{
 			e.printStackTrace();
 		}
     	if(num>0){
-    		//¸üĞÂ¿Í»§¶Ë±£³ÖµÄÃô¸Ğ´ÊÁĞ±í
+    		//æ›´æ–°å®¢æˆ·ç«¯ä¿æŒçš„æ•æ„Ÿè¯åˆ—è¡¨
     		sendWarningWord(channel);
-    		//Ë½ÁÄ
+    		//ç§èŠ
     		if(homeNum==Protocol_Config.ROOMNUM_PRIVATE_CHAT&&id!=null){
-    			sendPrivateSysMess(id, "¹¹½¨ºÍĞ³Éç»á£¬ÄãµÄĞÅÏ¢ÖĞ"+num+"¸öÃô¸Ğ´Ê»ã±»ÆÁ±Î£¡", channel);
-    		//ÈºÁÄ»ò¹ã³¡
+    			sendPrivateSysMess(id, "æ„å»ºå’Œè°ç¤¾ä¼šï¼Œä½ çš„ä¿¡æ¯ä¸­"+num+"ä¸ªæ•æ„Ÿè¯æ±‡è¢«å±è”½ï¼", channel);
+    		//ç¾¤èŠæˆ–å¹¿åœº
     		}else{
-    			sendSysMess(homeNum,"¹¹½¨ºÍĞ³Éç»á£¬ÄãµÄĞÅÏ¢ÖĞ"+num+"¸öÃô¸Ğ´Ê»ã±»ÆÁ±Î£¡", channel);
+    			sendSysMess(homeNum,"æ„å»ºå’Œè°ç¤¾ä¼šï¼Œä½ çš„ä¿¡æ¯ä¸­"+num+"ä¸ªæ•æ„Ÿè¯æ±‡è¢«å±è”½ï¼", channel);
     		}
     	}
     	return mess;
     }
-    //TODO ·µ»ØÓëÃô¸Ğ´Ê×ÖÊıÏàÍ¬µÄ*ºÅ
+    //TODO è¿”å›ä¸æ•æ„Ÿè¯å­—æ•°ç›¸åŒçš„*å·
     private String getStarChar(String str){
     	String s = "";
     	for(int i = 0;i<str.length();i++){
@@ -603,7 +676,7 @@ public class NIOServer extends Protocol_DataExpress{
     	}
     	return s;
     }
-    //TODO ¸üĞÂËùÓĞÓÃ»§µÄ·¿¼äÁĞ±í
+    //TODO æ›´æ–°æ‰€æœ‰ç”¨æˆ·çš„æˆ¿é—´åˆ—è¡¨
     private void updateRoomList(){
     	for(String str:channelMap.keySet()){
     		SocketChannel chan = channelMap.get(str);
@@ -611,7 +684,7 @@ public class NIOServer extends Protocol_DataExpress{
     	}
     }
     /** 
-     * ¸ù¾İÁÄÌìÊÒµÄºÅÂëÀ´»ñÈ¡ÁÄÌìÊÒ
+     * æ ¹æ®èŠå¤©å®¤çš„å·ç æ¥è·å–èŠå¤©å®¤
      * @param roomNum
      * @return
      */
@@ -623,7 +696,7 @@ public class NIOServer extends Protocol_DataExpress{
     	return null;
     }
     
-    //TODO ·¢ËÍ´íÎó±¨¸æ
+    //TODO å‘é€é”™è¯¯æŠ¥å‘Š
     private void sysError(SocketChannel channel,String mess){
     	int length = 4 + mess.getBytes().length + 4;
     	buffer = ByteBuffer.allocateDirect(length);
@@ -631,22 +704,22 @@ public class NIOServer extends Protocol_DataExpress{
     	put(mess);
     	writeBuffer(channel);
     }
-    //TODO ¼Ù¶¨ÓĞÎ´ÊµÏÖµÄ¹¦ÄÜ
+    //TODO å‡å®šæœ‰æœªå®ç°çš„åŠŸèƒ½
     public void other(SocketChannel channel){
-    	//TODO ÒÔÏÂÊÇÒ»´Î´«Êı¾İµÄ¹ı³Ì
-        int length = 4 //ConfigÀï¶¯×÷£¨int£©µÄ³¤¶È
-       		 + 4 + "Î´¿ª·¢£¬¾´ÇëÆÚ´ı".getBytes().length;  //Õ¼¾İ³¤¶È
+    	//TODO ä»¥ä¸‹æ˜¯ä¸€æ¬¡ä¼ æ•°æ®çš„è¿‡ç¨‹
+        int length = 4 //Configé‡ŒåŠ¨ä½œï¼ˆintï¼‰çš„é•¿åº¦
+       		 + 4 + "æœªå¼€å‘ï¼Œæ•¬è¯·æœŸå¾…".getBytes().length;  //å æ®é•¿åº¦
         buffer = ByteBuffer.allocateDirect(length);
-        //°Ñ¸Õ¸Õ¼ÆËã³¤¶ÈµÄÄÇĞ©put½øÈ¥
+        //æŠŠåˆšåˆšè®¡ç®—é•¿åº¦çš„é‚£äº›putè¿›å»
     	buffer.putInt(Protocol_Config.SHOW_ME);
-    	put("Î´¿ª·¢£¬¾´ÇëÆÚ´ı");
-    	writeBuffer(channel);//Ğ´Èëµ½¹ÜµÀÀï£¬µÈÓÚ·¢³öÈ¥ÁË
+    	put("æœªå¼€å‘ï¼Œæ•¬è¯·æœŸå¾…");
+    	writeBuffer(channel);//å†™å…¥åˆ°ç®¡é“é‡Œï¼Œç­‰äºå‘å‡ºå»äº†
     }
   /*  public void showMess(SocketChannel channel){
     	String mess = getString(channel);
     	System.out.println(mess);
     }*/
-    //TODO ¸ø¿Í»§¶Ë·¢ÏûÏ¢
+    //TODO ç»™å®¢æˆ·ç«¯å‘æ¶ˆæ¯
     public void addMess(SocketChannel channel,String mess){
     	int length = 4 + mess.getBytes().length + 4;
     	buffer = ByteBuffer.allocateDirect(length);
@@ -654,7 +727,7 @@ public class NIOServer extends Protocol_DataExpress{
     	put(mess);
     	writeBuffer(channel);
     }
-    //TODO ·¢ËÍ´íÎó±¨¸æ
+    //TODO å‘é€é”™è¯¯æŠ¥å‘Š
     public void addError(SocketChannel channel,String mess){
     	int length = 4 + mess.getBytes().length + 4;
     	buffer = ByteBuffer.allocateDirect(length);
@@ -662,7 +735,7 @@ public class NIOServer extends Protocol_DataExpress{
     	put(mess);
     	writeBuffer(channel);
     }
-    //TODO »ñÈ¡Ãô¸Ğ´Ê£¨´ÓtxtÎÄ¼şÖĞ»ñÈ¡£©
+    //TODO è·å–æ•æ„Ÿè¯ï¼ˆä»txtæ–‡ä»¶ä¸­è·å–ï¼‰
     public String[] getWarningWord() throws IOException{
     	File file = new File(warningWordPath);
     	if(!file.exists()){
@@ -675,12 +748,78 @@ public class NIOServer extends Protocol_DataExpress{
         fReader.read(cbuf);
         text = new String(cbuf.array());
         if(text.length()==0){
-        	System.out.println("Ã»ÓĞÉè¶¨Ãô¸Ğ´Ê£¡£¡£¡£¡£¡£¡£¡");
+        	System.out.println("æ²¡æœ‰è®¾å®šæ•æ„Ÿè¯ï¼ï¼ï¼ï¼ï¼ï¼ï¼");
         }
         String[] list = text.split("\r\n");
-        
+        fReader.close();
     	return list;
     }
-  
+  //TODO è·å–è´¦å·åˆ—è¡¨
+    public List<String[]> getAccountList() throws IOException{
+    	List<String[]> accountList = new ArrayList<String[]>();
+    	File file = new File(accountPath);
+    	if(file.exists()){
+    		FileReader reader = new FileReader(file);
+    		CharBuffer cb = CharBuffer.allocate((int)file.length());
+    		reader.read(cb);
+    		String text = new String(cb.array());
+    		String[] element = text.split("\r\n");
+    		for(String s:element){
+    			String[] oneAccount = s.split("\\*#");
+    			accountList.add(oneAccount);
+    		}
+    		reader.close();
+    	}
+    	return accountList;
+    }
+    public void addAccount(String userId,String password,String nickname) throws IOException{
+    	File file = new File(accountPath);
+    	if(!file.exists()){
+    		file.createNewFile();
+    	}
+    	FileReader reader = new FileReader(file);
+    	CharBuffer cb = CharBuffer.allocate((int)file.length());
+    	reader.read(cb);
+    	String text = new String(cb.array());
+    	if(text.length()>0)
+    		text += "\r\n";
+    	text += userId + "*#" + password + "*#" + nickname;
+    	FileWriter writer = new FileWriter(file);
+    	writer.write(text);
+    	writer.flush();
+    	writer.close();
+    	reader.close();
+    }
+    public void changeAccount(String userId,String nickname) throws IOException{
+    	List<String[]> list = getAccountList();
+    	String password = null;
+    	String lastNickname = null;
+    	for(String[] acc:list){
+    		if(acc[0].equals(userId)){
+    			password = acc[1];
+    			lastNickname = acc[2];
+    		}
+    	}
+    	if(password==null){
+    		return;
+    	}
+    	File file = new File(accountPath);
+    	if(!file.exists()){
+    		return;
+    	}
+    	FileReader reader = new FileReader(file);
+    	CharBuffer cb = CharBuffer.allocate((int)file.length());
+    	reader.read(cb);
+    	String text = new String(cb.array());
+    	String oldAccount = userId + "*#" + password + "*#" + lastNickname;
+    	String newAccount = userId + "*#" + password + "*#" + nickname;
+    	text = text.replace(oldAccount, newAccount);
+    	FileWriter writer = new FileWriter(file);
+    	writer.write(text);
+    	writer.flush();
+    	writer.close();
+    	reader.close();
+    }
 }
 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             

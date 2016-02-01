@@ -13,10 +13,10 @@ import server.Protocol_DataExpress;
 import config.Config;
 
 /**
- * @TODO£ºÁ¬½Ó·þÎñÆ÷£¬¸ºÔð·¢ËÍÇëÇóµ½·þÎñÆ÷¼°½ÓÊÕ·þÎñÆ÷µÄÏûÏ¢
+ * @TODOï¼šè¿žæŽ¥æœåŠ¡å™¨ï¼Œè´Ÿè´£å‘é€è¯·æ±‚åˆ°æœåŠ¡å™¨åŠæŽ¥æ”¶æœåŠ¡å™¨çš„æ¶ˆæ¯
  * @fileName : client.ChatHandler.java
  * date | author | version |   
- * 2015Äê11ÔÂ5ÈÕ | Jiong | 1.0 |
+ * 2015å¹´11æœˆ5æ—¥ | Jiong | 1.0 |
  */
 public class ChatHandler extends Protocol_DataExpress{
 	protected static final long serialVersionUID = 1L;
@@ -24,11 +24,11 @@ public class ChatHandler extends Protocol_DataExpress{
 	public ChatHandler(Base clazz){
 		this.ui = clazz;
 	}
-	// ÐÅµÀÑ¡ÔñÆ÷
+	// ä¿¡é“é€‰æ‹©å™¨
     private Selector selector;
-    // Óë·þÎñÆ÷Í¨ÐÅµÄÐÅµÀ
+    // ä¸ŽæœåŠ¡å™¨é€šä¿¡çš„ä¿¡é“
     static SocketChannel socketChannel;
-    //Á´½Ó·þÎñÆ÷
+    //é“¾æŽ¥æœåŠ¡å™¨
 	public boolean linkServer(){
 		 selector = Config.linkServer();
 		 socketChannel = Config.getSocketChannel();
@@ -38,7 +38,27 @@ public class ChatHandler extends Protocol_DataExpress{
 	     new Thread(lt).start();
 	     return true;
 	}
-	//Ïò·þÎñÆ÷ÖÐ×¢²á¹ÜµÀ
+	//TODO æ³¨å†Œè´¦å·
+	public void registerAccount(String userId,String password,String nickname){
+		int length = 4 + 4 + userId.getBytes().length +
+				4 + password.getBytes().length + 4 + nickname.getBytes().length;
+		buffer = ByteBuffer.allocateDirect(length);
+		buffer.putInt(Protocol_Config.REGISTER_ACCOUNT);
+		put(userId);
+		put(password);
+		put(nickname);
+		writeBuffer(socketChannel);
+	}
+	//TODO ç™»é™†
+	public void login(String userId,String password){
+		int length  = 4 + 4 + userId.getBytes().length + 4 + password.getBytes().length;
+		buffer = ByteBuffer.allocateDirect(length);
+		buffer.putInt(Protocol_Config.LOGIN);
+		put(userId);
+		put(password);
+		writeBuffer(socketChannel);
+	}
+	//å‘æœåŠ¡å™¨ä¸­æ³¨å†Œç®¡é“
 	public void register(String id,User user){
 		try {
 			byte[] bytes = getBytes(user);
@@ -53,7 +73,7 @@ public class ChatHandler extends Protocol_DataExpress{
 			e.printStackTrace();
 		}
 	}
-	//¸Ä±äÓÃ»§ÐÅÏ¢
+	//æ”¹å˜ç”¨æˆ·ä¿¡æ¯
 	public void changeUser(User user){
 		try {
 			byte[] bytes = getBytes(user);
@@ -67,7 +87,7 @@ public class ChatHandler extends Protocol_DataExpress{
 			e.printStackTrace();
 		}
 	}
-	//½¨·¿
+	//å»ºæˆ¿
 	public void createRoom(String roomName){
 		int length = 4 + 4 + roomName.getBytes().length;
 		buffer = ByteBuffer.allocateDirect(length);
@@ -75,18 +95,18 @@ public class ChatHandler extends Protocol_DataExpress{
 		put(roomName);
 		writeBuffer(socketChannel);
 	}
-	//»ñÈ¡·¿¼äÁÐ±í
+	//èŽ·å–æˆ¿é—´åˆ—è¡¨
 	public void requestList(){
 		writeInt(Protocol_Config.ROOM_LIST,socketChannel);
 	}
-	//½øÈëÁÄÌìÊÒ
+	//è¿›å…¥èŠå¤©å®¤
 	public void intoRoom(int roomNum){
 		buffer = ByteBuffer.allocateDirect(8);
 		buffer.putInt(Protocol_Config.INTO_ROOM);
 		buffer.putInt(roomNum);
 		writeBuffer(socketChannel);
 	}
-	//·¢ËÍÏûÏ¢
+	//å‘é€æ¶ˆæ¯
 	public void sendMess(int roomNum,String nickname,String mess){
 		int length = 4 + 4 + nickname.getBytes().length + 4 + mess.getBytes().length + 4;
 		buffer = ByteBuffer.allocateDirect(length);
@@ -96,14 +116,14 @@ public class ChatHandler extends Protocol_DataExpress{
 		put(mess);
 		writeBuffer(socketChannel);
 	}
-	//ÍË³öÁÄÌìÊÒ
+	//é€€å‡ºèŠå¤©å®¤
 	public void exitRoom(int roomNum){
 		buffer = ByteBuffer.allocateDirect(8);
 		buffer.putInt(Protocol_Config.EXIT_ROOM);
 		buffer.putInt(roomNum);
 		writeBuffer(socketChannel);
 	}
-	//ÍË³ö¿Í»§¶Ë
+	//é€€å‡ºå®¢æˆ·ç«¯
 	public void exitClient(){
 		writeInt(Protocol_Config.EXIT_CLIENT,socketChannel);
 	}
@@ -115,6 +135,7 @@ public class ChatHandler extends Protocol_DataExpress{
 		put(id);
 		writeBuffer(socketChannel);
 	}
+	//TODO èŽ·å–ip+ç«¯å£å·
 	public String getID(){
 		try {
 			return socketChannel.getLocalAddress().toString();
@@ -137,7 +158,7 @@ public class ChatHandler extends Protocol_DataExpress{
 			return -1;
 		}
 	}
-	//TODO¡¡
+	//TODOã€€
 	class ListenThread extends Protocol_DataExpress implements Runnable{
 		Selector selector;
 		public ListenThread(Selector selector){
@@ -147,59 +168,59 @@ public class ChatHandler extends Protocol_DataExpress{
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
-			System.out.println("¿Í»§¶Ë¼àÌý¿ªÆô³É¹¦");
+			System.out.println("å®¢æˆ·ç«¯ç›‘å¬å¼€å¯æˆåŠŸ");
 		try{
 	 	 while (true) {  
-	          //µ±×¢²áµÄÊÂ¼þµ½´ïÊ±£¬·½·¨·µ»Ø£»·ñÔò,¸Ã·½·¨»áÒ»Ö±×èÈû  
+	          //å½“æ³¨å†Œçš„äº‹ä»¶åˆ°è¾¾æ—¶ï¼Œæ–¹æ³•è¿”å›žï¼›å¦åˆ™,è¯¥æ–¹æ³•ä¼šä¸€ç›´é˜»å¡ž  
 	          selector.select();  
-	          // »ñµÃselectorÖÐÑ¡ÖÐµÄÏîµÄµü´úÆ÷£¬Ñ¡ÖÐµÄÏîÎª×¢²áµÄÊÂ¼þ  
+	          // èŽ·å¾—selectorä¸­é€‰ä¸­çš„é¡¹çš„è¿­ä»£å™¨ï¼Œé€‰ä¸­çš„é¡¹ä¸ºæ³¨å†Œçš„äº‹ä»¶  
 	          Iterator ite = selector.selectedKeys().iterator();  
 	          while (ite.hasNext()) {  
 	              SelectionKey key = (SelectionKey) ite.next();  
-	              // É¾³ýÒÑÑ¡µÄkey,ÒÔ·ÀÖØ¸´´¦Àí  
+	              // åˆ é™¤å·²é€‰çš„key,ä»¥é˜²é‡å¤å¤„ç†  
 	              ite.remove();  
 	              if (key.isConnectable()) {  
 	                  SocketChannel channel = (SocketChannel) key  
 	                          .channel();  
-	                  // Èç¹ûÕýÔÚÁ¬½Ó£¬ÔòÍê³ÉÁ¬½Ó  
+	                  // å¦‚æžœæ­£åœ¨è¿žæŽ¥ï¼Œåˆ™å®Œæˆè¿žæŽ¥  
 	                  if(channel.isConnectionPending()){  
 	                      channel.finishConnect();  
 	                        
 	                  }  
-	                  // ÉèÖÃ³É·Ç×èÈû  
+	                  // è®¾ç½®æˆéžé˜»å¡ž  
 	                  channel.configureBlocking(false);  
 
-	                  //ÔÚÕâÀï¿ÉÒÔ¸ø·þÎñ¶Ë·¢ËÍÐÅÏ¢Å¶  
-	                  //channel.write(ByteBuffer.wrap(new String("Ïò·þÎñ¶Ë·¢ËÍÁËÒ»ÌõÐÅÏ¢").getBytes()));  
-	                  //ÔÚºÍ·þÎñ¶ËÁ¬½Ó³É¹¦Ö®ºó£¬ÎªÁË¿ÉÒÔ½ÓÊÕµ½·þÎñ¶ËµÄÐÅÏ¢£¬ÐèÒª¸øÍ¨µÀÉèÖÃ¶ÁµÄÈ¨ÏÞ¡£  
+	                  //åœ¨è¿™é‡Œå¯ä»¥ç»™æœåŠ¡ç«¯å‘é€ä¿¡æ¯å“¦  
+	                  //channel.write(ByteBuffer.wrap(new String("å‘æœåŠ¡ç«¯å‘é€äº†ä¸€æ¡ä¿¡æ¯").getBytes()));  
+	                  //åœ¨å’ŒæœåŠ¡ç«¯è¿žæŽ¥æˆåŠŸä¹‹åŽï¼Œä¸ºäº†å¯ä»¥æŽ¥æ”¶åˆ°æœåŠ¡ç«¯çš„ä¿¡æ¯ï¼Œéœ€è¦ç»™é€šé“è®¾ç½®è¯»çš„æƒé™ã€‚  
 	                  channel.register(selector, SelectionKey.OP_READ);  
 	                    
-	                  // »ñµÃÁË¿É¶ÁµÄÊÂ¼þ  
+	                  // èŽ·å¾—äº†å¯è¯»çš„äº‹ä»¶  
 	              } else if (key.isReadable()) {  
 	                      read(key);  
 	              }  
 	          }
 	 	 	}
 	 	 }catch(IOException e){
-	 		 System.out.println("´íÎó:"+e.getMessage());
+	 		 System.out.println("é”™è¯¯:"+e.getMessage());
 	 	 }
 		
 		}
 		/** 
-		   * ´¦Àí¶ÁÈ¡·¢À´µÄÐÅÏ¢ µÄÊÂ¼þ 
+		   * å¤„ç†è¯»å–å‘æ¥çš„ä¿¡æ¯ çš„äº‹ä»¶ 
 		   * @param key 
 		   * @throws IOException  
 		   */  
 		  public void read(SelectionKey key) throws IOException{  
 		  	
-		  	 // ·þÎñÆ÷¿É¶ÁÈ¡ÏûÏ¢:µÃµ½ÊÂ¼þ·¢ÉúµÄSocketÍ¨µÀ 
+		  	 // æœåŠ¡å™¨å¯è¯»å–æ¶ˆæ¯:å¾—åˆ°äº‹ä»¶å‘ç”Ÿçš„Socketé€šé“ 
 		      SocketChannel channel = (SocketChannel) key.channel();  
 		      
-		      //ÏÈ»ñÈ¡¶¯×÷Âë£¬ÅÐ¶ÏÒª½øÐÐÊ²Ã´¶¯×÷
+		      //å…ˆèŽ·å–åŠ¨ä½œç ï¼Œåˆ¤æ–­è¦è¿›è¡Œä»€ä¹ˆåŠ¨ä½œ
 		      int action = getInt(channel);
-		     // System.out.println("»ñÈ¡action£º"+action);
-		      //ÕâÀï¸ù¾ÝactionµÄ·¶Î§È¥¾ö¶¨½øÈëÄÄÒ»¸öswitch
-		      //ËùÒÔaction»®¶¨ºÃ·¶Î§¿ÉÒÔ·Ö±ð½øÈë²»Í¬µÄÖÐ×ªÕ¾(switch)È¥Ñ¡ÔñÖ´ÐÐÏàÓ¦µÄ¶¯×÷ 
+		     // System.out.println("èŽ·å–actionï¼š"+action);
+		      //è¿™é‡Œæ ¹æ®actionçš„èŒƒå›´åŽ»å†³å®šè¿›å…¥å“ªä¸€ä¸ªswitch
+		      //æ‰€ä»¥actionåˆ’å®šå¥½èŒƒå›´å¯ä»¥åˆ†åˆ«è¿›å…¥ä¸åŒçš„ä¸­è½¬ç«™(switch)åŽ»é€‰æ‹©æ‰§è¡Œç›¸åº”çš„åŠ¨ä½œ 
 		      if(action>=2000&&action<=2999){
 		      	switch(action){
 		      	case Protocol_Config.ROOM_LIST:
@@ -224,10 +245,30 @@ public class ChatHandler extends Protocol_DataExpress{
 		      		sysMess_privateChat(channel);break;
 		      	case Protocol_Config.KICK_USER:
 		      		beKicked(channel);break;
+		      	case Protocol_Config.REGISTER_ACCOUNT:
+		      		registerFeedback(channel);break;
+		      	case Protocol_Config.LOGIN_SUCCESS:
+		      		loginSuccess(channel);break;
+		      	case Protocol_Config.LOGIN_FAIL:
+		      		loginFail(channel);break;
 		      	}
 		      }
 		  }  
-		  //½ÓÊÕ·þÎñÆ÷µÄÏûÏ¢£¬¶Ô¿Í»§¶Ë½øÐÐÏàÓ¦´¦Àí
+		  //æŽ¥æ”¶æœåŠ¡å™¨çš„æ¶ˆæ¯ï¼Œå¯¹å®¢æˆ·ç«¯è¿›è¡Œç›¸åº”å¤„ç†
+		  void registerFeedback(SocketChannel channel){
+			  String mess = getString(channel);
+			  ui.setRegisterFeedback(mess);
+		  }
+		  void loginSuccess(SocketChannel channel){
+			  String userId = getString(channel);
+			  String nickname = getString(channel);
+			  ui.setLoginFeedback("success");
+			  ui.loginSucceed(userId, nickname);
+		  }
+		  void loginFail(SocketChannel channel){
+			  String mess = getString(channel);
+			  ui.setLoginFeedback(mess);
+		  }
 		  void setHomeList(SocketChannel channel){
 			  Object obj = getObject(socketChannel);
 			  String[] str = (String[])obj;
@@ -246,8 +287,8 @@ public class ChatHandler extends Protocol_DataExpress{
 		  void receiveMess(SocketChannel channel){
 			  try {
 				int roomNum = getInt(channel);
-				String nickname = getString(channel); //È¡Ò»¸öString
-				String mess = getString(channel);//ÔÙÈ¡Ò»¸ö
+				String nickname = getString(channel); //å–ä¸€ä¸ªString
+				String mess = getString(channel);//å†å–ä¸€ä¸ª
 				ui.receiveMess(roomNum,nickname,mess);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -309,3 +350,4 @@ public class ChatHandler extends Protocol_DataExpress{
 }
 
 
+                                                                                                                                                                                                                                                                                                                                                                                          

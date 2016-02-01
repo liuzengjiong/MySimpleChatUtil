@@ -29,6 +29,7 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -40,7 +41,7 @@ import server.Protocol_Config;
 import util.AttributeSetUtil;
 
 /**
- * TODO ¿Í»§¶Ë½çÃæ£¨´óÌü£©
+ * TODO å®¢æˆ·ç«¯ç•Œé¢ï¼ˆå¤§å…ï¼‰
  * @author Jiong
  *
  */
@@ -76,12 +77,12 @@ public class GroundChatClient extends JFrame{
 	private JLabel labId = null;
 	
 	
-	StyledDocument doc;//ÁÄÌì´°¿ÚµÄ·ç¸ñ(JTextPane)
+	StyledDocument doc;//èŠå¤©çª—å£çš„é£æ ¼(JTextPane)
 	private PopupMenu _popMenu;
 	String list[];
 	Base base;
 	
-	//Ôö¼ÓÓÃ»§ĞÅÏ¢ÅÌ
+	//å¢åŠ ç”¨æˆ·ä¿¡æ¯ç›˜
 	private JSplitPane mostRightPane = null;
 	private JPanel userInfoPane = null;
 	private JSplitPane getMostRightPane(){
@@ -98,14 +99,14 @@ public class GroundChatClient extends JFrame{
 		if(userInfoPane==null){
 			userInfoPane = new JPanel();
 			userInfoPane.setLayout(null);
-			userInfoPane.setBorder(BorderFactory.createTitledBorder("ÎÒµÄĞÅÏ¢"));
-			JLabel _labName = new JLabel("êÇ³Æ£º");
+			userInfoPane.setBorder(BorderFactory.createTitledBorder("æˆ‘çš„ä¿¡æ¯"));
+			JLabel _labName = new JLabel("æ˜µç§°ï¼š");
 			_labName.setBounds(new Rectangle(5,30,40,20));
 			jtfName = new JTextField();
 			jtfName.setBounds(new Rectangle(50,30,100,20));
 			jtfName.setEditable(false);
 			jtfName.setText(base.getUser().getAbsoluteNickname());
-			labName = new JLabel("ĞŞ¸Ä");
+			labName = new JLabel("ä¿®æ”¹");
 			labName.setForeground(Color.BLUE);
 			labName.addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e){
@@ -115,7 +116,7 @@ public class GroundChatClient extends JFrame{
 				}
 			});
 			labName.setBounds(new Rectangle(160,30,50,20));
-			JLabel _labId  = new JLabel("ID£º");
+			JLabel _labId  = new JLabel("IDï¼š");
 			_labId.setBounds(new Rectangle(5,60,40,20));
 			labId = new JLabel(base.getUser().getId());
 			labId.setBounds(new Rectangle(50,60,100,20));
@@ -134,24 +135,26 @@ public class GroundChatClient extends JFrame{
 		if(wantToShan)
 			new Thread(new ShanDong()).start();
 	}
+	//ä¿®æ”¹æ˜µç§°
 	private void changeName(){
 		String s = labName.getText();
-		if(s.equals("ĞŞ¸Ä")){
-			labName.setText("È·¶¨");
+		if(s.equals("ä¿®æ”¹")){
+			labName.setText("ç¡®å®š");
 			jtfName.setEditable(true);
 			jtfName.requestFocus();
 		}else{
-			labName.setText("ĞŞ¸Ä");
+			labName.setText("ä¿®æ”¹");
 			jtfName.setEditable(false);
 			User user = base.getUser();
 			user.setNickName(jtfName.getText());
 			base.setUser(user);
 			labName.requestFocus();
+			setClientTitle();
 		}
 	}
 	private JLabel getLabChaterList(){
 		if(labChaterList==null){
-			labChaterList = new JLabel("<html><u>ÄúÓĞÎ´²é¿´µÄË½ĞÅ£¬µã´Ë²é¿´</u></html>");
+			labChaterList = new JLabel("<html><u>æ‚¨æœ‰æœªæŸ¥çœ‹çš„ç§ä¿¡ï¼Œç‚¹æ­¤æŸ¥çœ‹</u></html>");
 			labChaterList.setVisible(false);
 			labChaterList.setForeground(Color.RED);
 			labChaterList.setBounds(new Rectangle(5,100,200,30));
@@ -178,7 +181,7 @@ public class GroundChatClient extends JFrame{
 	private JPanel getBottomPane(){
 		if (bottomPane == null) {
 			/*JLabel lblSend = new JLabel();
-			lblSend.setText("ÊäÈë£º");
+			lblSend.setText("è¾“å…¥ï¼š");
 			lblSend.setBounds(new Rectangle(9, 11, 39, 18));*/
 			bottomPane = new JPanel();
 			bottomPane.setLayout(null);
@@ -191,7 +194,7 @@ public class GroundChatClient extends JFrame{
 	private JButton getBtnOk(){
 		if (btnOk == null) {
 			btnOk = new JButton();
-			btnOk.setText("·¢ËÍ");
+			btnOk.setText("å‘é€");
 			btnOk.setLocation(new Point(356, 58));
 			btnOk.setSize(new Dimension(80, 22));
 			btnOk.setPreferredSize(new Dimension(60, 22));
@@ -207,7 +210,7 @@ public class GroundChatClient extends JFrame{
 		if(inputPane==null){
 			inputPane = new JScrollPane();
 			inputPane.setViewportView(getInputArea());
-			inputPane.setBorder(BorderFactory.createTitledBorder("ÊäÈë"));
+			inputPane.setBorder(BorderFactory.createTitledBorder("è¾“å…¥"));
 			inputPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 			inputPane.setLocation(new Point(3, 5));
 			inputPane.setSize(new Dimension(350, 80));
@@ -228,7 +231,7 @@ public class GroundChatClient extends JFrame{
 		return inputArea;
 	}
 	
-	//ÏûÏ¢¹ö¶¯ÅÌ
+	//æ¶ˆæ¯æ»šåŠ¨ç›˜
 	private JScrollPane getMsgPane(){
 		if(messagePane==null){
 			messagePane = new JScrollPane();
@@ -236,7 +239,7 @@ public class GroundChatClient extends JFrame{
 		}
 		return messagePane;
 	}
-	//ÏûÏ¢ÄÚÈİÅÌ
+	//æ¶ˆæ¯å†…å®¹ç›˜
 	private JTextPane getMsgContent(){
 		if(messageText==null){
 			messageText = new JTextPane();
@@ -244,7 +247,7 @@ public class GroundChatClient extends JFrame{
 		}
 		return messageText;
 	}
-	//µ×ÅÌ
+	//åº•ç›˜
 	private JSplitPane getBasePane(){
 		if(basePane==null){
 			basePane = new JSplitPane();
@@ -254,7 +257,7 @@ public class GroundChatClient extends JFrame{
 		}
 		return basePane;
 	}
-	//ÓÒ²¿·Ö
+	//å³éƒ¨åˆ†
 	private JSplitPane getRightPane(){
 		if(rightPane==null){
 			rightPane = new JSplitPane();
@@ -264,19 +267,19 @@ public class GroundChatClient extends JFrame{
 		}
 		return rightPane;
 	}
-	//ÁÄÌì²¿·Ö
+	//èŠå¤©éƒ¨åˆ†
 	private JSplitPane getChatGroundPane(){
 		if(chatGroundPane==null){
 			chatGroundPane = new JSplitPane();
 			chatGroundPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
 			chatGroundPane.setDividerLocation(400);
-			chatGroundPane.setBorder(BorderFactory.createTitledBorder("ÁÄÌì¹ã³¡"));
+			chatGroundPane.setBorder(BorderFactory.createTitledBorder("èŠå¤©å¹¿åœº"));
 			chatGroundPane.setTopComponent(getMsgPane());
 			chatGroundPane.setBottomComponent(getBottomPane());
 		}
 		return chatGroundPane;
 	}
-	//ÓÃ»§ÁĞ±í²¿·Ö
+	//ç”¨æˆ·åˆ—è¡¨éƒ¨åˆ†
 	private JScrollPane getUserListPane(){
 		if(userListPane==null){
 			userListPane = new JScrollPane();
@@ -289,16 +292,20 @@ public class GroundChatClient extends JFrame{
 			userTree = new JTree();
 			userTree.addMouseListener(new MouseAdapter(){
 				 public void mousePressed(MouseEvent e) {  
-				        //ÓÒ¼ü
+				        //å³é”®
 				        if (e.getButton() == 3) { 
-				        	 TreePath path = userTree.getPathForLocation(e.getX(), e.getY());//µÃµ½Ê÷½áµãµÄÂ·¾¶ 
+				        	 TreePath path = userTree.getPathForLocation(e.getX(), e.getY());//å¾—åˆ°æ ‘ç»“ç‚¹çš„è·¯å¾„ 
 						        if (path == null) {  
 						            return;  
 						        }  
 						        userTree.setSelectionPath(path); 
 						        DefaultMutableTreeNode note = (DefaultMutableTreeNode) userTree.getLastSelectedPathComponent();
-						        String name = note.toString();//»ñµÃÕâ¸ö½áµãµÄÃû³Æ
-						        //µã×Ô¼º²»·´Ó¦
+						        //æ ¹èŠ‚ç‚¹ä¸ååº”
+						        if(note.isRoot()){
+						        	return;
+						        }
+						        String name = note.toString();//è·å¾—è¿™ä¸ªç»“ç‚¹çš„åç§°
+						        //ç‚¹è‡ªå·±ä¸ååº”
 						        if(name.equals(base.getNickname()))
 						        	return;
 						        _popMenu.set_aimUser(name);
@@ -306,7 +313,7 @@ public class GroundChatClient extends JFrame{
 				        }  
 				    }
 			});
-			root = new DefaultMutableTreeNode("ÊÀ½ç²¿·ÖÔÚÏßÓÃ»§(<=20)");
+			root = new DefaultMutableTreeNode("æœåŠ¡å™¨éƒ¨åˆ†åœ¨çº¿ç”¨æˆ·(<=20)");
 			model = new DefaultTreeModel(root);
 			userTree.setModel(model);
 			userTree.updateUI();
@@ -324,18 +331,18 @@ public class GroundChatClient extends JFrame{
 	public void addTree(String str){
 		root.add(new DefaultMutableTreeNode(str));
 	}
-	//·¿¼äÁĞ±í²¿·Ö
+	//æˆ¿é—´åˆ—è¡¨éƒ¨åˆ†
 	private JPanel getRoomListPane(){
 		if(roomListPane==null){
 			roomListPane = new JPanel();
 			roomListPane.setLayout(new BorderLayout());	
 			listChat = new JList(list);
-			listChat.setBorder(BorderFactory.createTitledBorder("ÁÄÌìÊÒÁĞ±í"));
+			listChat.setBorder(BorderFactory.createTitledBorder("èŠå¤©å®¤åˆ—è¡¨"));
 			listChat.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			JPanel panel = new JPanel();
 			panel.setLayout(new GridLayout(1, 2));
-			JButton ok = new JButton("½øÈë");
-			JButton newH = new JButton("´´½¨ÁÄÌìÊÒ");
+			JButton ok = new JButton("è¿›å…¥");
+			JButton newH = new JButton("åˆ›å»ºèŠå¤©å®¤");
 			
 			ok.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -343,8 +350,8 @@ public class GroundChatClient extends JFrame{
 					if(listChat.getSelectedValue()==null)
 						return;
 					String str = listChat.getSelectedValue().toString();
-					if(str.endsWith("(ÒÑ½øÈë)")){
-						base.showError("ÄãÒÑ¾­½øÁË¸Ã·¿¼ä");
+					if(str.endsWith("(å·²è¿›å…¥)")){
+						base.showError("ä½ å·²ç»è¿›äº†è¯¥æˆ¿é—´");
 						return;
 					}
 					base.intoRoom(str);
@@ -356,14 +363,14 @@ public class GroundChatClient extends JFrame{
 					String roomName = null;
 					try{
 						roomName = 
-								JOptionPane.showInputDialog(null,"ÇëÊäÈë·¿¼äÃû£º\n","ÌáÊ¾",JOptionPane.PLAIN_MESSAGE,null,null,"Ëæ±ãÁÄÁÄ").toString();
+								JOptionPane.showInputDialog(getContentPane(),"è¯·è¾“å…¥æˆ¿é—´åï¼š\n","åˆ›å»ºèŠå¤©å®¤",JOptionPane.PLAIN_MESSAGE,null,null,"éšä¾¿èŠèŠ").toString();
 					}catch(Exception ee){
 						
 					}
 					if(roomName==null)
 						return;
 					if(roomName.length()==0)
-						roomName = "ÎÒµÄ·¿¼ä";
+						roomName = "æˆ‘çš„æˆ¿é—´";
 					base.createRoom(roomName);
 				}	
 			});
@@ -388,7 +395,7 @@ public class GroundChatClient extends JFrame{
     	}
     	return s;
     }
-	//Ãô¸Ğ´Ê¹ıÂË
+	//æ•æ„Ÿè¯è¿‡æ»¤
 	 private String warningChecked(String mess){
 	    	String[] list = base.getWarningWord();
 			if(list==null){
@@ -405,7 +412,7 @@ public class GroundChatClient extends JFrame{
 	public void sendMess(){
 		String str = inputArea.getText();
 		if(str.replaceAll(" ", "").length()==0){
-			sysMess("Çë·¢ËÍÓĞÒâÒåµÄÏûÏ¢");
+			sysMess("è¯·å‘é€æœ‰æ„ä¹‰çš„æ¶ˆæ¯");
 			return;
 		}
 		Date date=new Date(System.currentTimeMillis());
@@ -451,7 +458,7 @@ public class GroundChatClient extends JFrame{
 	}
 	public void sysMess(String mess){
 		try {
-			mess = "ÏµÍ³ÌáÊ¾£º"+mess;
+			mess = "ç³»ç»Ÿæç¤ºï¼š"+mess;
 			if(messageText.getText().length()!=0){
 		    	getDocStyle().insertString(doc.getLength(), "\r\n", null);
 			}
@@ -462,6 +469,9 @@ public class GroundChatClient extends JFrame{
 			e.printStackTrace();
 		}
 	}
+	public void setClientTitle(){
+		setTitle("èŠå¤©å®¤å®¢æˆ·ç«¯----"+base.getNickname());
+	}
 	/**
 	 * Create the dialog.
 	 */
@@ -470,19 +480,19 @@ public class GroundChatClient extends JFrame{
 		this.list = list;
 		
 		_popMenu = new PopupMenu(base);
-		setTitle("ÁÄÌìÊÒ¿Í»§¶Ë----"+base.getNickname());
+		setTitle("èŠå¤©å®¤å®¢æˆ·ç«¯----"+base.getNickname());
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		//µã´°¿Ú¡ÁºÅµÄÊÂ¼ş
+		//ç‚¹çª—å£Ã—å·çš„äº‹ä»¶
 		addWindowListener(new WindowAdapter() {
 		public void windowClosing(WindowEvent e) {
-			int n = JOptionPane.showConfirmDialog(null, "È·¶¨ÍË³öÂğ(ÍË³ö¹Ø±ÕËùÓĞ´°¿Ú)", "ÌáÊ¾",JOptionPane.YES_NO_OPTION);
+			int n = JOptionPane.showConfirmDialog(null, "ç¡®å®šé€€å‡ºå—(é€€å‡ºå…³é—­æ‰€æœ‰çª—å£)", "æç¤º",JOptionPane.YES_NO_OPTION);
 			if(n==0){
 				closeClient();
 			}
 		}
 		});
 		setResizable(false);
-		System.out.println("·¿¼äÁĞ±í");
+		System.out.println("æˆ¿é—´åˆ—è¡¨");
 		Container container = getContentPane();
 		container.add(getBasePane());
 		this.setSize(1000,530);
@@ -517,3 +527,4 @@ public class GroundChatClient extends JFrame{
 		
 	}
 }
+                                                                                                                                                                                                                                               

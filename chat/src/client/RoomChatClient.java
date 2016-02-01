@@ -38,7 +38,7 @@ import javax.swing.tree.TreePath;
 import model.User;
 import util.AttributeSetUtil;
 /**
- * TODO£ºÁÄÌìÊÒ½çÃæ´°¿Ú
+ * TODOï¼šèŠå¤©å®¤ç•Œé¢çª—å£
  * @author Jiong
  *
  */
@@ -46,15 +46,15 @@ public class RoomChatClient extends JFrame {
 	private static final long serialVersionUID = 1L;
 	
 	Base base = null;
-	String[] roomList = null; //·¿¼äÁĞ±í
-	GroundChatClient roomListDialog = null; //´óÌü
+	String[] roomList = null; //æˆ¿é—´åˆ—è¡¨
+	GroundChatClient roomListDialog = null; //å¤§å…
 	int roomNum = 0;
 	String roomTitle = null;
-	StyledDocument doc;//ÁÄÌì´°¿ÚµÄ·ç¸ñ
-	private PopupMenu _popMenu; //ÓÒ¼ü²Ëµ¥
-	private JTree tree = null; //ÓÃ»§ÁĞ±í
-	private DefaultMutableTreeNode root; //ÓÃ»§ÁĞ±í¸ù½Úµã
-	private DefaultTreeModel model; //ÓÃ»§ÁĞ±í£¨Ê÷£©µÄÊı¾İÄ£ĞÍ
+	StyledDocument doc;//èŠå¤©çª—å£çš„é£æ ¼
+	private PopupMenu _popMenu; //å³é”®èœå•
+	private JTree tree = null; //ç”¨æˆ·åˆ—è¡¨
+	private DefaultMutableTreeNode root; //ç”¨æˆ·åˆ—è¡¨æ ¹èŠ‚ç‚¹
+	private DefaultTreeModel model; //ç”¨æˆ·åˆ—è¡¨ï¼ˆæ ‘ï¼‰çš„æ•°æ®æ¨¡å‹
 	private JPanel jContentPane = null;
 	private JSplitPane jSplitPane = null;
 	private JSplitPane jSplitPane1 = null;
@@ -66,7 +66,7 @@ public class RoomChatClient extends JFrame {
 	private JTextArea txtSendArea = null;
 	private JButton btnSend = null;
 	public  User user = new User();
-	private JScrollPane jScrollPane1 = null; //ÓÒ±ßµÄÓÃ»§ÁĞ±í¹ö¶¯¿ò
+	private JScrollPane jScrollPane1 = null; //å³è¾¹çš„ç”¨æˆ·åˆ—è¡¨æ»šåŠ¨æ¡†
 	
 
 	
@@ -122,7 +122,7 @@ public class RoomChatClient extends JFrame {
 	private JPanel getJPanel() {
 		if (jPanel == null) {
 			lblSend = new JLabel();
-			lblSend.setText("ÊäÈë£º");
+			lblSend.setText("è¾“å…¥ï¼š");
 			lblSend.setBounds(new Rectangle(9, 11, 39, 18));
 			jPanel = new JPanel();
 			jPanel.setLayout(null);
@@ -190,7 +190,7 @@ public class RoomChatClient extends JFrame {
 	private JButton getBtnSend() {
 		if (btnSend == null) {
 			btnSend = new JButton();
-			btnSend.setText("·¢ËÍ");
+			btnSend.setText("å‘é€");
 			btnSend.setLocation(new Point(366, 38));
 			btnSend.setSize(new Dimension(60, 22));
 			btnSend.setPreferredSize(new Dimension(60, 22));
@@ -249,10 +249,10 @@ public class RoomChatClient extends JFrame {
 		getJContentPane().updateUI();
 		txtSendArea.requestFocus();
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		//µã´°¿Ú¡ÁºÅµÄÊÂ¼ş
+		//ç‚¹çª—å£Ã—å·çš„äº‹ä»¶
 		addWindowListener(new WindowAdapter() {
 		public void windowClosing(WindowEvent e) {
-			int n = JOptionPane.showConfirmDialog(null, "È·¶¨ÍË³ö·¿¼äÂğ£¿", "ÌáÊ¾",JOptionPane.YES_NO_OPTION);
+			int n = JOptionPane.showConfirmDialog(null, "ç¡®å®šé€€å‡ºæˆ¿é—´å—ï¼Ÿ", "æç¤º",JOptionPane.YES_NO_OPTION);
 			if(n==0){
 				exitRoom();
 				dispose();
@@ -279,12 +279,12 @@ public class RoomChatClient extends JFrame {
 		roomTitle = title;
 		setTitle(title);
 		String reg = "\\[(\\d+)\\]";
-		Pattern pattern = Pattern.compile(reg);//ÑùÊ½
-		Matcher matcher = pattern.matcher(title);//Æ¥Åä
+		Pattern pattern = Pattern.compile(reg);//æ ·å¼
+		Matcher matcher = pattern.matcher(title);//åŒ¹é…
 		if(matcher.find()){
 			int roomNum = Integer.valueOf(matcher.group(1));
 			this.roomNum = roomNum;
-			System.out.println("·¿¼äºÅ£º"+this.roomNum);
+			System.out.println("æˆ¿é—´å·ï¼š"+this.roomNum);
 		}
 	}
 	private String getStarChar(String str){
@@ -294,7 +294,7 @@ public class RoomChatClient extends JFrame {
     	}
     	return s;
     }
-	//Ãô¸Ğ´Ê¹ıÂË
+	//æ•æ„Ÿè¯è¿‡æ»¤
 	 private String warningChecked(String mess){
 	    	String[] list = base.getWarningWord();
 			if(list==null){
@@ -311,7 +311,7 @@ public class RoomChatClient extends JFrame {
 	public void sendMess(){
 		String str = txtSendArea.getText();
 		if(str.replaceAll(" ", "").length()==0){
-			sysMess("Çë·¢ËÍÓĞÒâÒåµÄÏûÏ¢");
+			sysMess("è¯·å‘é€æœ‰æ„ä¹‰çš„æ¶ˆæ¯");
 			return;
 		}
 		Date date=new Date(System.currentTimeMillis());
@@ -357,7 +357,7 @@ public class RoomChatClient extends JFrame {
 	}
 	public void sysMess(String mess){
 		try {
-			mess = "ÏµÍ³ÌáÊ¾£º"+mess;
+			mess = "ç³»ç»Ÿæç¤ºï¼š"+mess;
 			if(txtContent.getText().length()!=0){
 		    	getDocStyle().insertString(doc.getLength(), "\r\n", null);
 			}
@@ -373,16 +373,20 @@ public class RoomChatClient extends JFrame {
 			tree = new JTree();
 			tree.addMouseListener(new MouseAdapter(){
 				 public void mousePressed(MouseEvent e) {  
-				        //ÓÒ¼ü
+				        //å³é”®
 				        if (e.getButton() == 3) { 
-				        	 TreePath path = tree.getPathForLocation(e.getX(), e.getY());//µÃµ½Ê÷½áµãµÄÂ·¾¶ 
+				        	 TreePath path = tree.getPathForLocation(e.getX(), e.getY());//å¾—åˆ°æ ‘ç»“ç‚¹çš„è·¯å¾„ 
 						        if (path == null) {  
 						            return;  
 						        }  
 						        tree.setSelectionPath(path); 
 						        DefaultMutableTreeNode note = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-						        String name = note.toString();//»ñµÃÕâ¸ö½áµãµÄÃû³Æ
-						        //µã×Ô¼º²»·´Ó¦
+						        //æ ¹èŠ‚ç‚¹ä¸ååº”
+						        if(note.isRoot()){
+						        	return;
+						        }
+						        String name = note.toString();//è·å¾—è¿™ä¸ªç»“ç‚¹çš„åç§°
+						        //ç‚¹è‡ªå·±ä¸ååº”
 						        if(name.equals(base.getNickname()))
 						        	return;
 						        _popMenu.set_aimUser(name);
@@ -390,7 +394,7 @@ public class RoomChatClient extends JFrame {
 				        }  
 				    }
 			});
-			root = new DefaultMutableTreeNode("·¿¼äµÄÔÚÏßÓÃ»§");
+			root = new DefaultMutableTreeNode("æˆ¿é—´çš„åœ¨çº¿ç”¨æˆ·");
 			model = new DefaultTreeModel(root);
 			tree.setModel(model);
 			tree.updateUI();
@@ -408,7 +412,7 @@ public class RoomChatClient extends JFrame {
 	public void addTree(String str){
 		root.add(new DefaultMutableTreeNode(str));
 	}
-	//ÉèÖÃ³ÉÎª¹ÜÀíÔ±
+	//è®¾ç½®æˆä¸ºç®¡ç†å‘˜
 	public void setAdmin(){
 		_popMenu.setAdmin(roomNum);
 	}
@@ -426,3 +430,4 @@ public class RoomChatClient extends JFrame {
 	}
 	
 }
+                                                                                                                                                         
